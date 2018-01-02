@@ -25,17 +25,9 @@ public class ZooKeeperClient {
 //    }
 
     // Method to connect zookeeper ensemble.
-    public static ZooKeeperClient connect(String host) throws IOException,InterruptedException {
-        final CountDownLatch connectedSignal = new CountDownLatch(1);
+    public static ZooKeeperClient connect(String host, Watcher watch) throws IOException,InterruptedException {
         ZooKeeperClient zClient = new ZooKeeperClient();
-        zClient.zoo = new ZooKeeper(host,5000,new Watcher() {
-            public void process(WatchedEvent we) {
-                if (we.getState() == Event.KeeperState.SyncConnected) {
-                    connectedSignal.countDown();
-                }
-            }
-        });
-        connectedSignal.await();
+        zClient.zoo = new ZooKeeper(host,3000, watch);
         return zClient;
     }
     
