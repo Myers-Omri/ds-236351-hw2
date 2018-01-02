@@ -37,11 +37,17 @@ public class LeaderFailureDetector {
     static public void electLeader() throws KeeperException, InterruptedException {
         List<String> children = zoo.getChildren(root, null, null);
         Collections.sort(children);
-        String leader = children.get(0);
-        byte[] data = zoo.getData(root + "/" + leader, null, null);
+        byte[] data = new byte[] {};
+        for (String leader : children) {
+            data = zoo.getData(root + "/" + leader, new FLDWatcher(), null);
+            if (data != null) {
+                break;
+            }
+        }
         electedLeader = new String(data);
-        System.out.println(electedLeader);
+//        System.out.println(electedLeader);
     }
+    //Add useless comment as Alon
 
     static public String getCurrentLeader() {
         return electedLeader;
