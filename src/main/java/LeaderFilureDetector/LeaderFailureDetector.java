@@ -47,6 +47,7 @@ public class LeaderFailureDetector {
         electedLeader = new String(data);
 //        System.out.println(electedLeader);
     }
+    //Add useless comment as Alon
 
     static public String getCurrentLeader() {
         return electedLeader;
