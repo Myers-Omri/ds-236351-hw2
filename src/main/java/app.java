@@ -1,10 +1,6 @@
 
-import DataTypes.Block;
-import LeaderFilureDetector.LeaderFailureDetector;
-import Utils.JsonSerializer;
+import Paxos.LeaderFailureDetector;
 import Utils.SystemUtils;
-
-import javax.swing.*;
 
 public class app {
     public static void main(String args[]) {
