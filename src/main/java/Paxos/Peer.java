@@ -1,21 +1,11 @@
-package DataTypes;
+package Paxos;
 
 public class Peer {
-    public int serverID;
-    public String address;
-    public int prepare;
-    public int promise;
-    public int accept;
-    public int accepted;
-    public int commit;
+    static public int a_prepare = 54321;
+    static public int a_accept = 54323;
+    static public int a_commit = 54325;
 
-    public Peer(int id, String add, int _prepare, int _promise, int _accept, int _accepted, int _commit) {
-        serverID = id;
-        address = add;
-        prepare = _prepare;
-        promise = _promise;
-        accept = _accept;
-        accepted = _accepted;
-        commit = _commit;
-    }
+    static public int l_promise = 64322;
+    static public int l_accepted = 64324;
+    static public int l_lateServer = 64325;
 }

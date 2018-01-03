@@ -10,6 +10,7 @@ public class FLDWatcher implements Watcher {
         if(Event.EventType.NodeDeleted.equals(eventType)) {
             try {
                 LeaderFailureDetector.electLeader();
+                LeaderFailureDetector.leaderFailure = true;
             } catch (Exception e) {
                 e.printStackTrace();
             }

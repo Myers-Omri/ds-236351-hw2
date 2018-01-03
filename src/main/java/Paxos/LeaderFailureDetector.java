@@ -12,6 +12,7 @@ public class LeaderFailureDetector {
     static private String ID;
     static private String root = "/ELECTION";
     static private String electedLeader;
+    static public boolean leaderFailure = false;
 
 
     static public void connect() throws IOException, InterruptedException {
@@ -46,6 +47,16 @@ public class LeaderFailureDetector {
 
     static public String getCurrentLeader() {
         return electedLeader;
+    }
+
+    static public void close() throws InterruptedException {
+        zoo.close();
+    }
+
+    static public void restart() throws InterruptedException, IOException, KeeperException {
+        close();
+        connect();
+        propose();
     }
 
 }
