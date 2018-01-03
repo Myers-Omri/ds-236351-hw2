@@ -1,5 +1,7 @@
 package Paxos;
 
+import BlockChain.BlockChainServer;
+import org.apache.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 
@@ -13,6 +15,7 @@ public class LeaderFailureDetector {
     static private String root = "/ELECTION";
     static private String electedLeader;
     static public boolean leaderFailure = false;
+    private static Logger log = Logger.getLogger(LeaderFailureDetector.class.getName());
 
 
     static public void connect() throws IOException, InterruptedException {
@@ -41,7 +44,7 @@ public class LeaderFailureDetector {
             }
         }
         electedLeader = new String(data);
-//        System.out.println(electedLeader);
+        log.info(String.valueOf(electedLeader.split(":")[1]));
     }
     //Add useless comment as Alon
 

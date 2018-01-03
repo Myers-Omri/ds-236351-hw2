@@ -1,18 +1,18 @@
 package BlockChain;
 
-import Paxos.PaxosMsgs.PaxosMsg;
+import DataTypes.Block;
+import DataTypes.TestTransaction;
+import Paxos.Paxos;
 import Paxos.Peer;
-import Paxos.ZooKeeperClient;
 import org.apache.log4j.Logger;
+import org.apache.log4j.net.SocketServer;
+import org.apache.zookeeper.KeeperException;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.stream.Stream;
 
@@ -20,26 +20,27 @@ public class BlockChainServer {
     private String name;
     private String address;
 //    private int port;
-    private List<BlockChainServer> peers;
-    private List<Block> blockchain = new ArrayList<>();
+    private List<String> peers = new ArrayList<String>();
+    private List<DataTypes.Block> blockchain = new ArrayList<>();
     private int id;
 
-    private List<ServerSocket> serverSocket = new ArrayList<>();
+    private List<ServerSocket> p2pSockets = new ArrayList<>();
     private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(10);
     private ServerSocket clientSocket;
 
     private boolean listening = true;
+    Paxos consensus;
     private static Logger log = Logger.getLogger(BlockChainServer.class.getName());
     // for jackson
-    public BlockChainServer() {
-    }
+//    public BlockChainServer() {
+//    }
 
-    BlockChainServer(final String name, final String address, final int port, final Block root,
-                     final List<BlockChainServer> agents) {
+    public BlockChainServer(final String name, final String address, final DataTypes.Block root,
+                            final List<String> agents, int id) {
         this.name = name;
         this.address = address;
-//        this.port = port;
         this.peers = agents;
+        this.id = id;
         blockchain.add(root);
     }
     public int getId() {return id;}
@@ -55,7 +56,7 @@ public class BlockChainServer {
 //        return port;
 //    }
 
-    public List<Block> getBlockchain() {
+    public List<DataTypes.Block> getBlockchain() {
         return blockchain;
     }
 
@@ -82,22 +83,24 @@ public class BlockChainServer {
 //        }
 //    }
 
-    void startHost() {
+    public void startHost() {
+//        peers.add("127.0.01"); //TODO: TEST FOR ONE PROCESS
+        consensus = new Paxos();
         executor.execute(() -> {
             try {
-                serverSocket.add(new ServerSocket(Peer.a_commit));
-                serverSocket.add(new ServerSocket(Peer.a_accept));
-                serverSocket.add(new ServerSocket(Peer.a_prepare));
-                serverSocket.add(new ServerSocket(Peer.l_accepted));
-                serverSocket.add(new ServerSocket(Peer.l_promise));
-                clientSocket = new ServerSocket(1234);
+                p2pSockets.add(new ServerSocket(Peer.a_commit));
+                p2pSockets.add(new ServerSocket(Peer.a_accept));
+                p2pSockets.add(new ServerSocket(Peer.a_prepare));
+                p2pSockets.add(new ServerSocket(Peer.l_accepted));
+                p2pSockets.add(new ServerSocket(Peer.l_promise));
+//                clientSocket = new ServerSocket(1234);
 //                System.out.println(String.format("Server %s started", serverSocket.getLocalPort()));
                 listening = true;
-                while (listening) {
-                    final BlockChainServerThread thread = new BlockChainServerThread(this, clientSocket.accept());
-                    thread.start();
-                }
-                clientSocket.close();
+//                while (listening) {
+//                    final BlockChainServerThread thread = new BlockChainServerThread(this, clientSocket.accept());
+//                    thread.start();
+//                }
+//                clientSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -108,11 +111,15 @@ public class BlockChainServer {
     void stopHost() {
         listening = false;
         try {
-            clientSocket.close();
+            for (ServerSocket s : p2pSockets) {
+                s.close();
+            }
+//            clientSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
 //    private Block getLatestBlock() {
 //        if (blockchain.isEmpty()) {
@@ -142,7 +149,7 @@ public class BlockChainServer {
 //        peers.forEach(peer -> sendMessage(type, peer.getAddress(), peer.getPort(), block));
 //    }
     public void broadcast(String msg, int port) {
-        peers.forEach(peer -> sendMessage(msg, peer.getAddress(), port));
+        peers.forEach(peer -> sendMessage(msg, peer, port));
     }
 
     public void sendMessage(String msg, String host, int port) {
@@ -171,6 +178,24 @@ public class BlockChainServer {
         return null;
     }
 
+    public void testBC() {
+        try {
+            consensus.init(this);
+            log.info("consensus initialized");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (int i = 1 ; i < 11 ; i++) {
+            DataTypes.Block b = new Block(i);
+            b.addTransaction(new TestTransaction());
+            log.info("starting consensus propose");
+            blockchain.add(consensus.propose(b));
+            log.info(String.format("Consensus finished added [%d, %d]", i, getBCLength()));
+        }
+        for (Block b : blockchain) {
+            System.out.println(b.prevBlockHash);
+        }
+    }
 //    private void sendMessage( String type, String host, int port, Block... blocks) {
 //        try (
 //                final Socket peer = new Socket(host, port);

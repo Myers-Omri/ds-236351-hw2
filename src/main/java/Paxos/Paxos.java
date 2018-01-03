@@ -4,6 +4,7 @@ import BlockChain.BlockChainServer;
 import DataTypes.Block;
 import Paxos.PaxosMsgs.*;
 import Utils.JsonSerializer;
+import org.apache.log4j.Logger;
 import org.apache.zookeeper.KeeperException;
 
 import java.io.IOException;
@@ -11,7 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Paxos {
-    private int qSize;
+    private int qSize = 1; //TODO: testing
     static private BlockChainServer server;
     private int r = 0;
     private int lastGoodRound = 0;
@@ -19,10 +20,17 @@ public class Paxos {
     private boolean decided = false;
     private Block v;
     private List<Thread> acceptorsThreads = new ArrayList<>();
+    private static Logger log = Logger.getLogger(LeaderFailureDetector.class.getName());
     Thread watcher = new Thread() {
         @Override
         public void run() {
             while(true) {
+                try {
+                    sleep(10); // TODO: ???
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+//                log.info("watcher thread");
                 if (LeaderFailureDetector.leaderFailure) {
                     if (Integer.parseInt(LeaderFailureDetector.getCurrentLeader().split(":")[1]) == server.getId()) {
                         for (Thread t : acceptorsThreads) {
@@ -41,18 +49,21 @@ public class Paxos {
         LeaderFailureDetector.setID(s.getAddress() + ":" + String.valueOf(s.getId()));
         LeaderFailureDetector.propose();
         LeaderFailureDetector.electLeader();
-        watcher.run();
+        watcher.start();
+        log.info("watcher thread starting");
     }
 
     public Block propose(Block block) {
+        v = block;
         while (!decided) {
             if (Integer.parseInt(LeaderFailureDetector.getCurrentLeader().split(":")[1]) == server.getId()) {
+                log.info("starting proposer phase");
                 proposerPhase();
             } else {
                 acceptorsPhase(block);
             }
         }
-        return null;
+        return v;
     }
 
     private void acceptorsPhase(Block b) {
@@ -61,7 +72,7 @@ public class Paxos {
         acceptorsThreads.add(commitMsgThread());
 
         for (Thread t : acceptorsThreads) {
-            t.run();
+            t.start();
         }
         for (Thread t : acceptorsThreads) {
             try {
@@ -179,6 +190,8 @@ public class Paxos {
         /* FIRST PHASE */
         server.broadcast(JsonSerializer.serialize(new PrepareMsg(server.getId(), r, server.getBCLength(), server.getAddress())), Peer.a_prepare);
         List<PromiseMsg> promSet = new ArrayList<>();
+        promSet.add( new PromiseMsg(server.getId(), r, PaxosMassegesTypes.ACK, lastGoodRound,
+                v, server.getBCLength(), server.getAddress()));
         while (promSet.size() < qSize) {
             for (String msg: server.receiveMessage(Peer.l_promise).collect(Collectors.toList())) {
                 PromiseMsg pmsg = (PromiseMsg) JsonSerializer.deserialize(msg, PromiseMsg.class);
@@ -203,6 +216,8 @@ public class Paxos {
         server.broadcast(JsonSerializer.serialize(new AcceptMsg(server.getId(), r, v, server.getBCLength(), server.getAddress())), Peer.a_accept);
         /* THIRD PHASE */
         List<AcceptedMsg> acceptedSet = new ArrayList<>();
+        acceptedSet.add( new AcceptedMsg(server.getId(), r, PaxosMassegesTypes.ACK,
+                server.getBCLength(), server.getAddress()));
         while (acceptedSet.size() < qSize) {
             for (String msg: server.receiveMessage(Peer.l_accepted).collect(Collectors.toList())) {
                 AcceptedMsg amsg = (AcceptedMsg) JsonSerializer.deserialize(msg, AcceptedMsg.class);
