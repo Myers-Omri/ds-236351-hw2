@@ -1,17 +1,29 @@
 
 import BlockChain.BlockChainServer;
 import DataTypes.Block;
-import Paxos.LeaderFailureDetector;
+import Utils.Config;
 import Utils.SystemUtils;
 
-import java.lang.reflect.Array;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class app {
     public static void main(String args[]) {
-        SystemUtils.init();
-        BlockChainServer s = new BlockChainServer("testServer", "localhost", new Block(0), Arrays.asList("127.0.0.1"), 0);
-        s.startHost();
-        s.testBC();
+        Config.init();
+        BlockChainServer s = null;
+        try {
+            SystemUtils.init();
+            s = new BlockChainServer("testServer", Config.server_addr, new Block(0), Config.server_id, Config.p_num);
+            s.testOneTimePaxos();
+            s.stopHost();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            s.stopHost();
+        }
+//        s.testCom();
+
+        //        s.startHost();
+//        s.testBC();
     }
 }
