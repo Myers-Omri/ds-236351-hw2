@@ -3,13 +3,21 @@ import BlockChain.BlockChainServer;
 import DataTypes.Block;
 import Utils.Config;
 import Utils.SystemUtils;
-
 import java.io.IOException;
-import java.util.Arrays;
+
 
 public class app {
-    public static void main(String args[]) {
+    static private BlockChainServer s;
+    public static  void init() {
         Config.init();
+        try {
+            s = new BlockChainServer(Config.s_name, Config.server_addr, new Block(0), Config.server_id, Config.p_num);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void main(String args[]) {
+
         BlockChainServer s = null;
         try {
             SystemUtils.init();

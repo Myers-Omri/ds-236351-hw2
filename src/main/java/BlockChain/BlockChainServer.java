@@ -71,39 +71,15 @@ public class BlockChainServer {
         return blockchain;
     }
 
-//    public void startHost() {
-////        peers.add("127.0.01"); //TODO: TEST FOR ONE PROCESS
-//        executor.execute(() -> {
-//            p2pSockets.put(Peer.a_commit, new P2PSocket(Peer.a_commit));
-//            p2pSockets.put(Peer.a_accept, new P2PSocket(Peer.a_accept));
-//            p2pSockets.put(Peer.a_prepare, new P2PSocket(Peer.a_prepare));
-//            p2pSockets.put(Peer.l_accepted, new P2PSocket(Peer.l_accepted));
-//            p2pSockets.put(Peer.l_promise, new P2PSocket(Peer.l_promise));
-//            try {
-//                Thread.sleep(5 * 1000);
-//                log.info(String.format(" [%d] Host started on address [%s]", getId(), getAddress()));
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-////                clientSocket = new ServerSocket(1234);
-////                System.out.println(String.format("Server %s started", serverSocket.getLocalPort()));
-//            listening = true;
-////                while (listening) {
-////                    final BlockChainServerThread thread = new BlockChainServerThread(this, clientSocket.accept());
-////                    thread.start();
-////                }
-////                clientSocket.close();
-//        });
-////        broadcast("REQ_ALL_BLOCKS", null);
-//    }
-
     public void stopHost() {
         listening = false;
             for (P2PSocket s : p2pSockets.values()) {
                 s.close();
             }
     }
-
+    public Block getBlock(int i) {
+        return blockchain.get(i);
+    }
     public void broadcast(String msg, int port) {
         MembershipDetectore.getMembers().forEach(peer -> sendMessage(msg, peer, port));
     }
@@ -129,14 +105,6 @@ public class BlockChainServer {
         return p2pSockets.get(port).getMsgs();
     }
 
-    public void testCom() {
-        for (int i : Arrays.asList(Peer.l_promise, Peer.l_accepted, Peer.a_accept, Peer.a_commit, Peer.a_prepare)) {
-            sendMessage(format("Hello port [%d]", i), getAddress(), i);
-            String s1 = receiveMessage(i).get(0);
-            log.info(s1);
-        }
-    }
-
     public void testOneTimePaxos() {
         DataTypes.Block b = new Block(0);
         b.addTransaction(new TestTransaction());
@@ -151,24 +119,4 @@ public class BlockChainServer {
             e.printStackTrace();
         }
     }
-//    public void testBC() {
-//        try {
-//            Paxos.init(this);
-//            log.info("consensus initialized");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        for (int i = 1 ; i < 11 ; i++) {
-//            DataTypes.Block b = new Block(i);
-//            b.addTransaction(new TestTransaction());
-//            log.info("starting consensus propose");
-//            blockchain.add(Paxos.propose(b));
-//            log.info(String.format("Consensus finished added [%d, %d]", i, getBCLength()));
-//        }
-//        for (Block b : blockchain) {
-//            System.out.println(b.prevBlockHash);
-//        }
-//    }
-
-
 }

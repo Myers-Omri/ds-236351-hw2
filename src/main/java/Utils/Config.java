@@ -11,6 +11,7 @@ public class Config {
     static public int p_num;
     static public int server_id;
     static public String server_addr;
+    static public String s_name;
 
     static public void init() {
         try {
@@ -22,6 +23,7 @@ public class Config {
         p_num = Integer.parseInt(props.getProperty("P_NUM"));
         server_id = Integer.parseInt(props.getProperty("SERVER_ID"));
         server_addr = props.getProperty("SERVER_ADDR");
+        s_name = props.getProperty("S_NAME");
         } catch (Exception e) {
             e.printStackTrace();
         }
