@@ -21,6 +21,7 @@ public class Paxos {
     private boolean decided = false;
     private Block v;
     private List<Thread> acceptorsThreads = new ArrayList<>();
+    private Thread proposerThread;
     private static Logger log = Logger.getLogger(Paxos.class.getName());
 
 
@@ -31,11 +32,16 @@ public class Paxos {
 
     public Block propose(Block block) {
         v = block;
-        Thread t = proposerPhaseThread();
-        t.start();
+        proposerThread = proposerPhaseThread();
+        proposerThread.start();
         acceptorsPhase(block);
         try {
-            t.join();
+            for (Thread t : acceptorsThreads) {
+                t.join();
+            }
+            acceptorsThreads = new ArrayList<>();
+            proposerThread.join();
+            proposerThread = null;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -49,13 +55,6 @@ public class Paxos {
 
         for (Thread t : acceptorsThreads) {
             t.start();
-        }
-        for (Thread t : acceptorsThreads) {
-            try {
-                t.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 

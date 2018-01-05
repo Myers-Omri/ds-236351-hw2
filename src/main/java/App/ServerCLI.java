@@ -2,6 +2,8 @@ package App;
 
 import java.util.logging.Logger;
 
+import DataTypes.Block;
+import DataTypes.Transaction;
 import Utils.JsonSerializer;
 import org.apache.commons.cli.*;
 
@@ -21,6 +23,10 @@ public class ServerCLI {
         options.addOption(Option.builder("show")
                 .hasArg()
                 .desc("shows the required block")
+                .build());
+        options.addOption(Option.builder("propose")
+                .hasArg()
+                .desc("propose a new block")
                 .build());
     }
 
@@ -50,6 +56,10 @@ public class ServerCLI {
                 int num = Integer.parseInt(in[0].split("-")[1]);
                 show(num);
             }
+            if (in[0].split("-")[0].equals("propose")) {
+                int hash = Integer.parseInt(in[0].split("-")[1]);
+                propose(hash);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -73,5 +83,11 @@ public class ServerCLI {
     }
     private void show(int num) {
         System.out.println(JsonSerializer.serialize(app.s.getBlock(num)));
+    }
+    private void propose(int hash) {
+        Block b = new Block(hash);
+        b.addTransaction(new Transaction());
+        b.addTransaction(new Transaction());
+        System.out.println(JsonSerializer.serialize(app.s.propose(b)));
     }
 }
