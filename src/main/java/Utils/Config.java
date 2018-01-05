@@ -16,7 +16,7 @@ public class Config {
     static public void init() {
         try {
 
-        File configFile = new File(Paths.get(System.getProperty("user.dir"), "src", "main", "resources","config.properties").toString());
+        File configFile = new File(Paths.get(System.getProperty("user.dir"), "target", "classes", "config.properties").toString());
         FileReader reader = new FileReader(configFile);
         Properties props = new Properties();
         props.load(reader);
