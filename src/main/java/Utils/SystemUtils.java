@@ -16,6 +16,6 @@ public class SystemUtils {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hhmmss");
         System.setProperty("current.date", dateFormat.format(new Date()));
 //        MDC.put("PID", Integer.toString(Config.id));
-//        System.setProperty("current.id", Integer.toString(Config.id));
+        System.setProperty("s_id", Integer.toString(Config.id));
     }
 }
