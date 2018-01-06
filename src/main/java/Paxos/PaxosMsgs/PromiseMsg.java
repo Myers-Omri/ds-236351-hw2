@@ -17,5 +17,6 @@ public class PromiseMsg extends PaxosMsg {
         ack = _ack;
         lastGoodRound = lgr;
         block = b;
+//        port = _port;
     }
 }

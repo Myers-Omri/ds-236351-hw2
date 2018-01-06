@@ -57,7 +57,7 @@ public class LeaderFailureDetector {
                 }
             }
             electedLeader = new String(data);
-            log.info(String.valueOf(electedLeader.split(":")[1]));
+            log.info(format("[%d] is the current leader", Integer.parseInt(electedLeader.split(":")[1])));
         }
     }
     //Add useless comment as Alon

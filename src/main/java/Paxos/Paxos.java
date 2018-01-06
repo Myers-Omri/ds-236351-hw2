@@ -3,6 +3,7 @@ package Paxos;
 import BlockChain.BlockChainServer;
 import DataTypes.Block;
 import Paxos.PaxosMsgs.*;
+import Utils.Config;
 import Utils.JsonSerializer;
 import Utils.LeaderFailureDetector;
 import org.apache.log4j.Logger;
@@ -64,7 +65,7 @@ public class Paxos {
             public void run() {
                 log.info("starting receive phase");
                 while (!decided) {
-                    for (String msg : server.receiveMessage(Peer.a_prepare)) {
+                    for (String msg : server.receiveMessage(PaxosMassegesTypes.PREPARE)) {
                         PrepareMsg m = (PrepareMsg) JsonSerializer.deserialize(msg, PrepareMsg.class);
                         if (m.serverID == getLeaderID()) {
 //                            if (m.blockNum <= server.getBCLength()) {
@@ -80,8 +81,8 @@ public class Paxos {
                                 server.sendMessage(
                                         JsonSerializer.serialize(
                                                 new PromiseMsg(server.getId(), m.r, PaxosMassegesTypes.ACK, lastGoodRound,
-                                                        b, server.getBCLength(), server.getAddress())),
-                                        m.serverAddr, Peer.l_promise);
+                                                        b, server.getBCLength(), Config.addr)),
+                                        m.serverAddr, m.promise_port);
                                 lastRound = m.r;
                                 break;
                             } else {
@@ -89,7 +90,7 @@ public class Paxos {
                                         JsonSerializer.serialize(
                                                 new PromiseMsg(server.getId(), m.r, PaxosMassegesTypes.NACK, lastGoodRound,
                                                         null, server.getBCLength(), server.getAddress())),
-                                        m.serverAddr, Peer.l_promise);
+                                        m.serverAddr, m.promise_port);
                                 break;
                             }
                         }
@@ -105,7 +106,7 @@ public class Paxos {
             public void run() {
                 log.info("starting accept phase");
                 while(!decided) {
-                    for (String msg : server.receiveMessage(Peer.a_accept)) {
+                    for (String msg : server.receiveMessage(PaxosMassegesTypes.ACCEPT)) {
                         AcceptMsg m = (AcceptMsg) JsonSerializer.deserialize(msg, AcceptMsg.class);
                         if (m.serverID == getLeaderID()) {
                             log.debug(format("got an ACCEPT message with r=%d, lastRound=%d", m.r, lastRound));
@@ -124,13 +125,13 @@ public class Paxos {
                                         JsonSerializer.serialize(
                                                 new AcceptedMsg(server.getId(), m.r, PaxosMassegesTypes.ACK,
                                                         server.getBCLength(), server.getAddress())),
-                                        getLeaderAddr(), Peer.l_accepted);
+                                        m.serverAddr, m.accepted_port);
                             } else {
                                 server.sendMessage(
                                         JsonSerializer.serialize(
                                                 new AcceptedMsg(server.getId(), m.r, PaxosMassegesTypes.NACK,
                                                         server.getBCLength(), server.getAddress())),
-                                        getLeaderAddr(), Peer.l_accepted);
+                                        m.serverAddr, m.accepted_port);
                             }
                         }
                     }
@@ -145,12 +146,12 @@ public class Paxos {
             public void run() {
                 log.info("starting commit phase");
                 while (!decided) {
-                    for (String msg : server.receiveMessage(Peer.a_commit)) {
+                    for (String msg : server.receiveMessage(PaxosMassegesTypes.COMMIT)) {
                         CommitMsg m = (CommitMsg) JsonSerializer.deserialize(msg, CommitMsg.class);
 //                        if (m.blockNum <= server.getBCLength()) {
 //
 //                        }
-                        log.debug(format("got an COMMIT message"));
+                        log.debug(format("got an COMMIT message from [%s]", m.serverAddr));
 //                        server.sendMessage(
 //                                JsonSerializer.serialize(
 //                                        new PromiseMsg(server.getId(), m.r, PaxosMassegesTypes.NACK, lastGoodRound,
@@ -164,7 +165,7 @@ public class Paxos {
                         decided = true;
                         server.broadcast(JsonSerializer.serialize(new CommitMsg(server.getId(), lastGoodRound, v,
                                 server.getBCLength(), server.getAddress())),
-                                Peer.a_commit); // TODO: remove that on real bc
+                                PaxosMassegesTypes.COMMIT); // TODO: remove that on real bc
                         acceptorsThreads.get(0).interrupt();
                         acceptorsThreads.get(1).interrupt();
                         return;
@@ -201,13 +202,14 @@ public class Paxos {
                 log.debug(format("[%d] starting proposer phase", server.getId()));
                 r = lastRound + 1;
                 /* FIRST PHASE */
-                server.broadcast(JsonSerializer.serialize(new PrepareMsg(server.getId(), r, server.getBCLength(), server.getAddress())), Peer.a_prepare);
+                server.broadcast(JsonSerializer.serialize(new PrepareMsg(server.getId(), r, server.getBCLength(),
+                        server.getAddress(), Config.l_promise)), PaxosMassegesTypes.PREPARE);
                 log.debug(format("[%d] leader has broadcast PREPARE MSG", server.getId()));
                 List<PromiseMsg> promSet = new ArrayList<>();
 //        promSet.add( new PromiseMsg(server.getId(), r, PaxosMassegesTypes.ACK, lastGoodRound,
 //                v, server.getBCLength(), server.getAddress()));
                 while (promSet.size() < qSize) {
-                    for (String msg: server.receiveMessage(Peer.l_promise)) {
+                    for (String msg: server.receiveMessage(PaxosMassegesTypes.PROMISE)) {
                         PromiseMsg pmsg = (PromiseMsg) JsonSerializer.deserialize(msg, PromiseMsg.class);
                         if (pmsg.type.equals(PaxosMassegesTypes.PROMISE)) { //TODO: add support in rounds of paxos
                             log.debug(format("[%d] leader has accepted PROMISE message", server.getId()));
@@ -221,13 +223,13 @@ public class Paxos {
                 if (ValidateQuorum(promSet.size())) return;
                 /* SECOND PHASE */
                 v = selectVal(promSet);
-                server.broadcast(JsonSerializer.serialize(new AcceptMsg(server.getId(), r, v, server.getBCLength(), server.getAddress())), Peer.a_accept);
+                server.broadcast(JsonSerializer.serialize(new AcceptMsg(server.getId(), r, v, server.getBCLength(), server.getAddress(), Config.l_accepted)), PaxosMassegesTypes.ACCEPT);
                 /* THIRD PHASE */
                 List<AcceptedMsg> acceptedSet = new ArrayList<>();
 //        acceptedSet.add( new AcceptedMsg(server.getId(), r, PaxosMassegesTypes.ACK,
 //                server.getBCLength(), server.getAddress()));
                 while (acceptedSet.size() < qSize) {
-                    for (String msg: server.receiveMessage(Peer.l_accepted)) {
+                    for (String msg: server.receiveMessage(PaxosMassegesTypes.ACCEPTED)) {
                         AcceptedMsg amsg = (AcceptedMsg) JsonSerializer.deserialize(msg, AcceptedMsg.class);
                         if (amsg.type.equals(PaxosMassegesTypes.ACCEPTED)) { //TODO: add support in rounds of paxos
                             log.debug(format("[%d] leader has accepted ACCEPTED message", server.getId()));
@@ -239,7 +241,7 @@ public class Paxos {
                         filter(acceptedMsg -> acceptedMsg.ack.equals(PaxosMassegesTypes.ACK)).
                         collect(Collectors.toList());
                 if (ValidateQuorum(acceptedSet.size())) return;
-                server.broadcast(JsonSerializer.serialize(new CommitMsg(server.getId(), r, v, server.getBCLength(), server.getAddress())), Peer.a_commit); // TODO: r-cast???
+                server.broadcast(JsonSerializer.serialize(new CommitMsg(server.getId(), r, v, server.getBCLength(), server.getAddress())), PaxosMassegesTypes.COMMIT); // TODO: r-cast???
                 log.debug(format("[%d] leader has broadcast COMMIT message", server.getId()));
                 decided = true;
                 return;

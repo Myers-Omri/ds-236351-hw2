@@ -13,5 +13,6 @@ public class CommitMsg extends PaxosMsg {
         blockNum = b_num;
         r = _r;
         block = b;
+//        port = _port;
     }
 }

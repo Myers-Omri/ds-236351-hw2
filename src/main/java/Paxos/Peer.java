@@ -1,11 +1,23 @@
 package Paxos;
 
-public class Peer {
-    static public int a_prepare = 54321;
-    static public int a_accept = 54323;
-    static public int a_commit = 54325;
+import Paxos.PaxosMsgs.PaxosMassegesTypes;
 
-    static public int l_promise = 64322;
-    static public int l_accepted = 64324;
-    static public int l_lateServer = 64325;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Peer {
+    public int id;
+    public String addr;
+    public Map<String, Integer> ports = new HashMap<>();
+
+
+    public Peer(int id, String addr, int a_prepare, int a_accept, int a_commit, int l_promise, int l_accepted) {
+        this.id = id;
+        this.addr = addr;
+        ports.put(PaxosMassegesTypes.PREPARE, a_prepare);
+        ports.put(PaxosMassegesTypes.ACCEPT, a_accept);
+        ports.put(PaxosMassegesTypes.COMMIT, a_commit);
+        ports.put(PaxosMassegesTypes.PROMISE, l_promise);
+        ports.put(PaxosMassegesTypes.ACCEPTED, a_accept);
+    }
 }

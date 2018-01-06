@@ -11,5 +11,6 @@ public class AcceptedMsg extends PaxosMsg {
         blockNum = blockn;
         r =_r;
         ack = _ack;
+//        port = _port;
     }
 }

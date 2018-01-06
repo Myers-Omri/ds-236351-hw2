@@ -2,10 +2,9 @@ package BlockChain;
 
 import DataTypes.Block;
 import Paxos.Paxos;
-import Utils.LeaderFailureDetector;
+import Paxos.PaxosMsgs.PaxosMassegesTypes;
+import Utils.*;
 import Paxos.Peer;
-import Utils.MembershipDetectore;
-import Utils.P2PSocket;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -24,7 +23,7 @@ public class BlockChainServer {
     private int id;
     Paxos consensus = null;
 
-    private Map<Integer, P2PSocket> p2pSockets = new HashMap<>();
+    private Map<String, P2PSocket> p2pSockets = new HashMap<>();
     private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(10);
     private ServerSocket clientSocket;
 
@@ -36,21 +35,30 @@ public class BlockChainServer {
 
     public BlockChainServer(final String name, final String address, final DataTypes.Block root,
                              int id, int p_num) throws IOException {
+        Random ran = new Random();
+        int x = ran.nextInt(6) + 5;
+        log.info(format("[%d] Host will wait %d seconds before starting", getId(), x));
+        try {
+            Thread.sleep(x * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         this.name = name;
         this.address = address;
         this.pNum = p_num;
         this.id = id;
-        MembershipDetectore.start(address);
+        Peer peers = new Peer(id, address, Config.a_prepare, Config.a_accept, Config.a_commit, Config.l_promise, Config.l_accepted);
+        MembershipDetectore.start(JsonSerializer.serialize(peers));
         log.info(format("[%d] Host started Membership detector", getId()));
         blockchain.add(root);
-        p2pSockets.put(Peer.a_commit, new P2PSocket(Peer.a_commit));
-        p2pSockets.put(Peer.a_accept, new P2PSocket(Peer.a_accept));
-        p2pSockets.put(Peer.a_prepare, new P2PSocket(Peer.a_prepare));
-        p2pSockets.put(Peer.l_accepted, new P2PSocket(Peer.l_accepted));
-        p2pSockets.put(Peer.l_promise, new P2PSocket(Peer.l_promise));
-        for (int s : p2pSockets.keySet()) {
+        p2pSockets.put(PaxosMassegesTypes.COMMIT, new P2PSocket(Config.a_commit));
+        p2pSockets.put(PaxosMassegesTypes.ACCEPT, new P2PSocket(Config.a_accept));
+        p2pSockets.put(PaxosMassegesTypes.PREPARE, new P2PSocket(Config.a_prepare));
+        p2pSockets.put(PaxosMassegesTypes.ACCEPTED, new P2PSocket(Config.l_accepted));
+        p2pSockets.put(PaxosMassegesTypes.PROMISE, new P2PSocket(Config.l_promise));
+        for (String s : p2pSockets.keySet()) {
             p2pSockets.get(s).start();
-            log.info(format("[%d] Host started P2P socket [%d]", getId(), s));
+            log.info(format("[%d] Host started P2P socket [%s] on port [%d]", getId(), s, peers.ports.get(s)));
         }
         LeaderFailureDetector.start(format("%s:%d", getAddress(), getId()));
         log.info(format("[%d] Host started Leader Failure detector", getId()));
@@ -95,12 +103,18 @@ public class BlockChainServer {
     public Block getBlock(int i) {
         return blockchain.get(i);
     }
-    public void broadcast(String msg, int port) {
-        MembershipDetectore.getMembers().forEach(peer -> sendMessage(msg, peer, port));
+    public void broadcast(String msg, String type) {
+        List<Peer> members = new ArrayList<>();
+        for (String s : MembershipDetectore.getMembers()) {
+            members.add((Peer) JsonSerializer.deserialize(s, Peer.class));
+        }
+        members.forEach(peer -> sendMessage(msg, peer.addr, peer.ports.get(type)));
     }
 
     public void sendMessage(String msg, String host, int port) {
         try {
+//            String host = p.addr;
+//            int port = p.ports.get(type);
             Socket peer = new Socket(host, port);
             DataOutputStream  out = new DataOutputStream (peer.getOutputStream());
             out.writeBytes(msg);
@@ -115,9 +129,9 @@ public class BlockChainServer {
         return blockchain.size();
     }
 
-    public List<String> receiveMessage(int port) {
-        log.debug(format("[%d] waits for a massage on (%s:%d)", getId(), getAddress(), port));
-        return p2pSockets.get(port).getMsgs();
+    public List<String> receiveMessage(String type) {
+        log.debug(format("[%d] waits for a massage on (%s:%s)", getId(), getAddress(), type));
+        return p2pSockets.get(type).getMsgs();
     }
 
     public Block propose(Block b) {
