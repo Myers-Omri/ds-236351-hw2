@@ -49,7 +49,7 @@ public class Paxos {
         decided = false;
         paxosRound++;
     }
-    public Block propose(Block block) {
+    public List<Block> propose(Block block) {
         init();
         v = block;
         proposerThread = proposerPhaseThread();
@@ -66,7 +66,7 @@ public class Paxos {
             e.printStackTrace();
         }
 //        decided = false;
-        return v;
+        return null; //TODO: change that!!!
     }
 
     private void acceptorsPhase(Block b) {

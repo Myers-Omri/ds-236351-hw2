@@ -90,8 +90,11 @@ public class BlockChainServer {
         return blockchain;
     }
     public void addBlock(Block b) {
-        Block d = consensus.propose(b);
-        blockchain.add(d);
+        List<Block> bl = consensus.propose(b);
+        blockchain.addAll(bl);
+    }
+    public boolean validateBlock(Block b, List<Block> bl) {
+        return true;
     }
     public void stopHost() {
         consensus.stopPaxos();
@@ -152,7 +155,7 @@ public class BlockChainServer {
 //        return ret;
 //    }
     public Block propose(Block b) {
-        return consensus.propose(b);
+        return consensus.propose(b).get(0);
     }
 //    public void testOneTimePaxos() {
 //        DataTypes.Block b = new Block(0);
