@@ -1,4 +1,4 @@
-package BlockChain;
+package SystemUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -6,15 +6,14 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class ServerClientBase {
     private static final String LOCAL_HOST  = "127.0.0.1";
 
-    private String name;
-    private String address;
-    private int port;
+    protected String name;
+    protected String address;
+    protected int port;
 
     private ServerSocket serverSocket;
     private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(10);
@@ -100,4 +99,8 @@ public class ServerClientBase {
         }
     }
 
+    // put here all the logic for dealing with messages need to be override
+    public void MessageHandler(MessageBase msg){
+        System.out.println(String.format("%d received: %s", port, msg.toString()));
+    }
 }

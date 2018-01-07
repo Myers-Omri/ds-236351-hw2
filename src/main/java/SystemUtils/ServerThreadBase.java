@@ -1,4 +1,4 @@
-package BlockChain;
+package SystemUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -40,6 +40,6 @@ public class ServerThreadBase extends Thread{
 
     //need to be override
     private void messageHandler(MessageBase msg) {
-        System.out.println(String.format("%d received: %s", _server.getPort(), msg.toString()));
+        _server.MessageHandler(msg);
     }
 }
