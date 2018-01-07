@@ -18,8 +18,11 @@ public class BlockChainServer extends ServerClientBase{
     }
 
     public void addBlock(Block b) {
-        Block d = consensus.propose(b);
-        blockchain.add(d);
+        List<Block> bl = consensus.propose(b);
+        blockchain.addAll(bl);
+    }
+    public boolean validateBlock(Block b, List<Block> bl) {
+        return true;
     }
     public void stopHost() {
         consensus.stopPaxos();
@@ -55,5 +58,38 @@ public class BlockChainServer extends ServerClientBase{
             System.out.println(String.format("%d received: %s", port, msg.toString()));
         }
     }
+
+    public int getBCLength(){
+        return blockchain.size();
+    }
+
+    public List<String> receiveMessage(String type) {
+        List<String> ret = p2pSockets.get(type).getMsgs();
+        log.info(format("[%d] received a massage on (%s:%s)", getId(), getAddress(), type));
+        return ret;
+    }
+//    public String receiveSingleMsg(String type) {
+//        log.info(format("[%d] try to receive a massage on (%s:%s)--", getId(), getAddress(), type));
+//        String ret = p2pSockets.get(type).getFirstMsg();
+//        log.info(format("[%d] received a massage on (%s:%s)--", getId(), getAddress(), type));
+//        return ret;
+//    }
+    public Block propose(Block b) {
+        return consensus.propose(b).get(0);
+    }
+//    public void testOneTimePaxos() {
+//        DataTypes.Block b = new Block(0);
+//        b.addTransaction(new TestTransaction());
+//        LeaderFailureDetector.start(format("%s:%d", getAddress(), getId()));
+//        Paxos p = new Paxos(this, (pNum / 2) + 1);
+//        DataTypes.Block b1 = p.propose(b);
+//        p.stopPaxos();
+//        log.info(format("block [%d] accepted", b1.prevBlockHash));
+//        try {
+//            LeaderFailureDetector.close();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 }
