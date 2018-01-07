@@ -1,21 +1,23 @@
-package DataTypes;
+package Paxos;
+
+import Paxos.PaxosMsgs.PaxosMassegesTypes;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Peer {
-    public int serverID;
-    public String address;
-    public int prepare;
-    public int promise;
-    public int accept;
-    public int accepted;
-    public int commit;
+    public int id;
+    public String addr;
+    public Map<String, Integer> ports = new HashMap<>();
 
-    public Peer(int id, String add, int _prepare, int _promise, int _accept, int _accepted, int _commit) {
-        serverID = id;
-        address = add;
-        prepare = _prepare;
-        promise = _promise;
-        accept = _accept;
-        accepted = _accepted;
-        commit = _commit;
+
+    public Peer(int id, String addr, int a_prepare, int a_accept, int a_commit, int l_promise, int l_accepted) {
+        this.id = id;
+        this.addr = addr;
+        ports.put(PaxosMassegesTypes.PREPARE, a_prepare);
+        ports.put(PaxosMassegesTypes.ACCEPT, a_accept);
+        ports.put(PaxosMassegesTypes.COMMIT, a_commit);
+        ports.put(PaxosMassegesTypes.PROMISE, l_promise);
+        ports.put(PaxosMassegesTypes.ACCEPTED, a_accept);
     }
 }

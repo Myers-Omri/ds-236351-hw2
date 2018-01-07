@@ -1,4 +1,4 @@
-package Paxos;
+package Utils;
 
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.*;

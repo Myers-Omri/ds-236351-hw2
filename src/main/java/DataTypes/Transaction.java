@@ -1,4 +1,8 @@
 package DataTypes;
 
-public abstract class Transaction {
+import static java.lang.Math.random;
+
+public class Transaction {
+    double data = random();
+
 }
