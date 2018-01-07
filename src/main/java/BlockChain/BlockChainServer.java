@@ -89,7 +89,10 @@ public class BlockChainServer {
     public List<DataTypes.Block> getBlockchain() {
         return blockchain;
     }
-
+    public void addBlock(Block b) {
+        Block d = consensus.propose(b);
+        blockchain.add(d);
+    }
     public void stopHost() {
         consensus.stopPaxos();
         try {

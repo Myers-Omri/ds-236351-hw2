@@ -28,6 +28,10 @@ public class ServerCLI {
                 .hasArg()
                 .desc("propose a new block")
                 .build());
+        options.addOption(Option.builder("add")
+                .hasArg()
+                .desc("adding a new block")
+                .build());
     }
 
     public void parse() {
@@ -60,6 +64,10 @@ public class ServerCLI {
                 int hash = Integer.parseInt(in[0].split("-")[1]);
                 propose(hash);
             }
+            if (in[0].split("-")[0].equals("add")) {
+                int hash = Integer.parseInt(in[0].split("-")[1]);
+                add(hash);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -89,5 +97,11 @@ public class ServerCLI {
         b.addTransaction(new Transaction());
         b.addTransaction(new Transaction());
         System.out.println(JsonSerializer.serialize(app.s.propose(b)));
+    }
+    private void add(int hash) {
+        Block b = new Block(hash);
+        b.addTransaction(new Transaction());
+        b.addTransaction(new Transaction());
+        app.s.addBlock(b);
     }
 }
