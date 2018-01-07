@@ -8,4 +8,5 @@ abstract public class PaxosMsg {
     public String serverAddr;
 //    public int port;
     public int blockNum;
+    public int round;
 }

@@ -16,12 +16,12 @@ import static java.lang.String.format;
 public class P2PSocket {
     private static Logger log = Logger.getLogger(P2PSocket.class.getName());
     private int port;
-    List<String> msgs = new ArrayList<>();
+    private List<String> msgs = new ArrayList<>();
     private ServerSocket socket;
     private Socket concc;
     private final Object lock = new Object();
-    boolean alive = true;
-    Thread listener;
+    private boolean alive = true;
+    private Thread listener;
      public P2PSocket(int _port) throws IOException {
          port = _port;
          socket = new ServerSocket(port);
@@ -55,6 +55,20 @@ public class P2PSocket {
          };
          listener.start();
      }
+//    public String getFirstMsg() {
+//        while (msgs.size() == 0) {
+//            try {
+//                synchronized(lock) {
+//                    lock.wait();
+//                }
+//            } catch (InterruptedException e) {
+//                return null;
+//            }
+//        }
+//        String ret = msgs.get(0);
+//        msgs.remove(0);
+//        return ret;
+//    }
 
     public List<String> getMsgs() {
          while (msgs.size() == 0) {
@@ -63,17 +77,11 @@ public class P2PSocket {
                      lock.wait();
                  }
              } catch (InterruptedException e) {
-                 try {
-                     concc.close();
-                     socket.close();
-                 } catch (IOException e1) {
-                     e1.printStackTrace();
-                 }
                  return Collections.emptyList();
              }
          }
          List<String> ret = msgs;
-         msgs = Collections.emptyList();
+         msgs = new ArrayList<>();
         return ret;
     }
 
@@ -96,8 +104,13 @@ public class P2PSocket {
                  msgs.add(line);
              }
          } catch (Exception e) {
-             log.debug("Exception while reading a socket: " + e.getMessage());
+             e.printStackTrace();
          }
 
     }
+
+    public void clear() {
+         msgs = new ArrayList<>();
+    }
 }
+

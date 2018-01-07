@@ -7,7 +7,7 @@ public class AcceptMsg extends PaxosMsg{
     public Block block;
     public int accepted_port;
 
-    public AcceptMsg(int id, int _r, Block b, int b_num, String sAddr, int _accepted_port) {
+    public AcceptMsg(int id, int _r, Block b, int b_num, String sAddr, int _accepted_port, int _round) {
         type = PaxosMassegesTypes.ACCEPT;
         serverAddr = sAddr;
         serverID = id;
@@ -15,6 +15,7 @@ public class AcceptMsg extends PaxosMsg{
         r = _r;
         block = b;
         accepted_port =_accepted_port;
+        round = _round;
 //        port = _port;
     }
 }

@@ -2,6 +2,8 @@ package Utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * Created by yon_b on 1/2/2018.

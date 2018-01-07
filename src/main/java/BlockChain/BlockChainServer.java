@@ -48,7 +48,7 @@ public class BlockChainServer {
         this.pNum = p_num;
         this.id = id;
         Peer peers = new Peer(id, address, Config.a_prepare, Config.a_accept, Config.a_commit, Config.l_promise, Config.l_accepted);
-        MembershipDetectore.start(JsonSerializer.serialize(peers));
+        MembershipDetectore.start(JsonSerializer.serialize(peers), Integer.toString(Config.id));
         log.info(format("[%d] Host started Membership detector", getId()));
         blockchain.add(root);
         p2pSockets.put(PaxosMassegesTypes.COMMIT, new P2PSocket(Config.a_commit));
@@ -73,6 +73,9 @@ public class BlockChainServer {
             e.printStackTrace();
         }
         listening = true;
+    }
+    public void clearSocket(String s) {
+        p2pSockets.get(s).clear();
     }
     public int getId() {return id;}
     public String getName() {
@@ -106,19 +109,24 @@ public class BlockChainServer {
     public void broadcast(String msg, String type) {
         List<Peer> members = new ArrayList<>();
         for (String s : MembershipDetectore.getMembers()) {
+            log.info(format("[%d] see [%s] as member", Config.id, s));
             members.add((Peer) JsonSerializer.deserialize(s, Peer.class));
         }
-        members.forEach(peer -> sendMessage(msg, peer.addr, peer.ports.get(type)));
+        for (Peer p : members) {
+            sendMessage(msg, p.addr, p.ports.get(type));
+        }
+//        members.forEach(peer -> sendMessage(msg, peer.addr, peer.ports.get(type)));
     }
 
     public void sendMessage(String msg, String host, int port) {
         try {
 //            String host = p.addr;
 //            int port = p.ports.get(type);
+            log.info(format("[%d] trying to send a massage to (%s:%d)", getId(), host, port));
             Socket peer = new Socket(host, port);
             DataOutputStream  out = new DataOutputStream (peer.getOutputStream());
             out.writeBytes(msg);
-            log.debug(format("[%d] send a massage to (%s:%d)", getId(), host, port));
+            log.info(format("[%d] send a massage to (%s:%d)", getId(), host, port));
             peer.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,10 +138,16 @@ public class BlockChainServer {
     }
 
     public List<String> receiveMessage(String type) {
-        log.debug(format("[%d] waits for a massage on (%s:%s)", getId(), getAddress(), type));
-        return p2pSockets.get(type).getMsgs();
+        List<String> ret = p2pSockets.get(type).getMsgs();
+        log.info(format("[%d] received a massage on (%s:%s)", getId(), getAddress(), type));
+        return ret;
     }
-
+//    public String receiveSingleMsg(String type) {
+//        log.info(format("[%d] try to receive a massage on (%s:%s)--", getId(), getAddress(), type));
+//        String ret = p2pSockets.get(type).getFirstMsg();
+//        log.info(format("[%d] received a massage on (%s:%s)--", getId(), getAddress(), type));
+//        return ret;
+//    }
     public Block propose(Block b) {
         return consensus.propose(b);
     }

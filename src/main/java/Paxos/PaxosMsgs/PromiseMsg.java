@@ -8,7 +8,7 @@ public class PromiseMsg extends PaxosMsg {
     public int lastGoodRound;
     public Block block;
 
-    public PromiseMsg(int id, int _r, String _ack, int lgr, Block b, int b_num, String sAddr) {
+    public PromiseMsg(int id, int _r, String _ack, int lgr, Block b, int b_num, String sAddr, int _round) {
         type = PaxosMassegesTypes.PROMISE;
         serverAddr = sAddr;
         serverID = id;
@@ -17,6 +17,7 @@ public class PromiseMsg extends PaxosMsg {
         ack = _ack;
         lastGoodRound = lgr;
         block = b;
+        round = _round;
 //        port = _port;
     }
 }
