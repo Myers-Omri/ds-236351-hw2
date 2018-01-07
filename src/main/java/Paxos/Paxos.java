@@ -20,7 +20,7 @@ public class Paxos {
     private int lastGoodRound = 0;
     private int lastRound = 0;
     private boolean decided = false;
-    private Block v;
+    private List<Block> v;
     private List<Thread> acceptorsThreads = new ArrayList<>();
     private Thread proposerThread;
     private static Logger log = Logger.getLogger(Paxos.class.getName());
@@ -51,7 +51,8 @@ public class Paxos {
     }
     public List<Block> propose(Block block) {
         init();
-        v = block;
+        v = new ArrayList<Block>();
+        v.add(block);
         proposerThread = proposerPhaseThread();
         proposerThread.start();
         acceptorsPhase(block);
@@ -66,11 +67,11 @@ public class Paxos {
             e.printStackTrace();
         }
 //        decided = false;
-        return null; //TODO: change that!!!
+        return v;
     }
 
     private void acceptorsPhase(Block b) {
-        acceptorsThreads.add(receiveMsgThread(b));
+        acceptorsThreads.add(receiveMsgThread());
         acceptorsThreads.add(accMsgThread());
         acceptorsThreads.add(commitMsgThread());
 
@@ -79,7 +80,7 @@ public class Paxos {
         }
     }
 
-    private Thread receiveMsgThread(Block b) {
+    private Thread receiveMsgThread() {
         return new Thread() {
             @Override
             public void run() {
@@ -103,7 +104,7 @@ public class Paxos {
                                 server.sendMessage(
                                         JsonSerializer.serialize(
                                                 new PromiseMsg(server.getId(), m.r, PaxosMassegesTypes.ACK, lastGoodRound,
-                                                        b, server.getBCLength(), Config.addr, paxosRound)),
+                                                        v, server.getBCLength(), Config.addr, paxosRound)),
                                         m.serverAddr, m.promise_port);
                                 lastRound = m.r;
                                 break;
@@ -148,7 +149,7 @@ public class Paxos {
 
                             if (m.r == lastRound) {
                                 lastGoodRound = m.r;
-                                v = m.block;
+                                v = m.blocks;
                                 server.sendMessage(
                                         JsonSerializer.serialize(
                                                 new AcceptedMsg(server.getId(), m.r, PaxosMassegesTypes.ACK,
@@ -186,7 +187,7 @@ public class Paxos {
                             continue;
                         }
                         log.info(format("got a COMMIT message from [%s]:[%s]", m.serverAddr, JsonSerializer.serialize(v)));
-                        v = m.block;
+                        v = m.blocks;
                         decided = true;
                         server.broadcast(JsonSerializer.serialize(new CommitMsg(Config.id, lastGoodRound, v,
                                         server.getBCLength(), Config.addr, paxosRound)),
@@ -308,14 +309,23 @@ public class Paxos {
         return false;
     }
 
-    static private Block selectVal(List<PromiseMsg> promSet) {
-        promSet.sort((o1, o2) -> {
-            if (o1.lastGoodRound > o2.lastGoodRound) return 1;
-            if (o1.lastGoodRound < o2.lastGoodRound) return -1;
-            if (o1.serverID > o2.serverID) return 1;
-            return -1;
-        });
-        return promSet.get(0).block;
+    private List<Block> selectVal(List<PromiseMsg> promSet) {
+        int maxLGR = promSet.stream().max(Comparator.comparingInt(m1 -> m1.lastGoodRound)).get().lastGoodRound;
+        promSet = promSet.stream().filter(m -> m.lastGoodRound == maxLGR).collect(Collectors.toList());
+        List<Block> res = new ArrayList<>();
+        for (PromiseMsg p : promSet) {
+            for (Block b : p.block) {
+                if (server.validateBlock(b, res)) {
+                    res.add(b);
+                }
+            }
+        }
+        long fHash = server.getBlockchain().get(server.getBCLength() - 1).prevBlockHash + 1;
+        for (Block b : res) {
+            b.prevBlockHash = fHash;
+            fHash++;
+        }
+        return res;
     }
 
     public void stopPaxos() {
