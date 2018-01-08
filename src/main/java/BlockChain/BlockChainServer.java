@@ -34,7 +34,7 @@ public class BlockChainServer {
 //    }
 
     public BlockChainServer(final String name, final String address, final DataTypes.Block root,
-                             int id, int p_num) throws IOException {
+                            int id, int p_num) throws IOException {
         Random ran = new Random();
         int x = ran.nextInt(3);
         log.info(format("[%d] Host will wait %d seconds before starting", getId(), x));
@@ -105,9 +105,9 @@ public class BlockChainServer {
             e.printStackTrace();
         }
         listening = false;
-            for (P2PSocket s : p2pSockets.values()) {
-                s.close();
-            }
+        for (P2PSocket s : p2pSockets.values()) {
+            s.close();
+        }
     }
     public Block getBlock(int i) {
         return blockchain.get(i);

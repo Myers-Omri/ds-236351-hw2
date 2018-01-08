@@ -104,14 +104,14 @@ public class ServerCLI {
     }
     private void propose(int hash) {
         Block b = new Block(hash);
-        b.addTransaction(new Transaction());
-        b.addTransaction(new Transaction());
+//        b.addTransaction(new Transaction());
+//        b.addTransaction(new Transaction());
         System.out.println(JsonSerializer.serialize(app.s.propose(b)));
     }
     private void add(int hash) {
         Block b = new Block(hash);
-        b.addTransaction(new Transaction());
-        b.addTransaction(new Transaction());
+//        b.addTransaction(new Transaction());
+//        b.addTransaction(new Transaction());
         app.s.addBlock(b);
     }
 }
