@@ -70,24 +70,24 @@ public class LeaderFailureDetector {
         zoo.close();
     }
 
-    static public void yelidLeaderShip(String add, int id) throws KeeperException, InterruptedException {
-        List<String> children = zoo.getChildren(root, null, null);
-        Collections.sort(children);
-        byte[] data = new byte[] {};
-        for (String child : children) {
-            data = zoo.getData(root + "/" + child, new PaxosWatcher() , null);
-            if (data != null) {
-                String sData = new String(data);
-                if (sData.split("0")[0].equals(add) && Integer.parseInt(sData.split(":")[1]) == id) {
-                    zoo.delete(root + "/" + child);
-                    propose(format("%s:%d", add, id));
-                    electedLeader = null;
-                    electLeader();
-                    return;
-                }
-            }
-        }
-    }
+//    static public void yelidLeaderShip(String add, int id) throws KeeperException, InterruptedException {
+//        List<String> children = zoo.getChildren(root, null, null);
+//        Collections.sort(children);
+//        byte[] data = new byte[] {};
+//        for (String child : children) {
+//            data = zoo.getData(root + "/" + child, new PaxosWatcher() , null);
+//            if (data != null) {
+//                String sData = new String(data);
+//                if (sData.split("0")[0].equals(add) && Integer.parseInt(sData.split(":")[1]) == id) {
+//                    zoo.delete(root + "/" + child);
+//                    propose(format("%s:%d", add, id));
+//                    electedLeader = null;
+//                    electLeader();
+//                    return;
+//                }
+//            }
+//        }
+//    }
 
 }
 

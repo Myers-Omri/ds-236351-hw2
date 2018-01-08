@@ -1,5 +1,6 @@
 package App;
 
+import java.util.Random;
 import java.util.logging.Logger;
 
 import DataTypes.Block;
@@ -20,6 +21,7 @@ public class ServerCLI {
         options.addOption("kill", "kill the server");
         options.addOption("showBC", "print the whole BC");
         options.addOption("exit", "exit the program");
+        options.addOption("sleep", "sleep random time");
         options.addOption(Option.builder("show")
                 .hasArg()
                 .desc("shows the required block")
@@ -44,7 +46,7 @@ public class ServerCLI {
             }
             if (in[0].equals("start")) {
                 start();
-                log.info("Initialization of server has finished successfully");
+                System.out.println("Initialization of server has finished successfully");
             }
             if (in[0].equals("kill")) {
                 kill();
@@ -55,6 +57,9 @@ public class ServerCLI {
             }
             if (in[0].equals("showBC")) {
                 showBC();
+            }
+            if (in[0].equals("sleep")) {
+                sleep();
             }
             if (in[0].split("-")[0].equals("show")) {
                 int num = Integer.parseInt(in[0].split("-")[1]);
@@ -91,6 +96,11 @@ public class ServerCLI {
     }
     private void show(int num) {
         System.out.println(JsonSerializer.serialize(app.s.getBlock(num)));
+    }
+    private void sleep() {
+        Random ran = new Random();
+        int x = ran.nextInt(3) + 3;
+        app.s.sleep(x);
     }
     private void propose(int hash) {
         Block b = new Block(hash);

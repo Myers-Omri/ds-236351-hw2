@@ -25,3 +25,4 @@ Utils\JsonSerializer.class
 Paxos\PaxosMsgs\AcceptedMsg.class
 Paxos\PaxosMsgs\PaxosMassegesTypes.class
 Utils\Config.class
+Utils\P2PSocket$1$1.class
