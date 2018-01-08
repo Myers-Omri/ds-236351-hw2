@@ -1,39 +1,39 @@
 package SystemUtils;
 
+import DataTypes.Transaction;
+
 import java.io.Serializable;
-import java.util.List;
 
 
-
-public class MessageBase implements Serializable {
+public class MessageBase {
 
     int _senderPort;
     public int _receiverPort;
     String _type;
-    String _data;
+    Transaction _transaction;
 
-    public MessageBase(int sender, int receiver, String type, String data){
+    public MessageBase(int sender, int receiver, String type, Transaction data){
         _senderPort = sender;
         _receiverPort = receiver;
         _type = type;
-        _data=data;
+        _transaction = data;
     }
     public MessageBase(int sender, int receiver, String type){
         _senderPort = sender;
         _receiverPort = receiver;
         _type = type;
-        _data="";
+        _transaction = null;
     }
-    public void SetData(String data){
-        _data = data;
+    public void SetData(Transaction data){
+        _transaction = data;
     }
 
 
-    @Override
-    public String toString() {
-        return String.format("{MessageBase: {sender:%d, receiver:%d, type:%s, data:%s}}", _senderPort, _receiverPort,
-                _type, _data);
-    }
+//    @Override
+//    public String toString() {
+//        return String.format("{MessageBase: {sender:%d, receiver:%d, type:%s, data:%d}}", _senderPort, _receiverPort,
+//                _type, _transaction._transactionId);
+//    }
 
     public int get_senderPort(){
         return _senderPort;
@@ -41,7 +41,7 @@ public class MessageBase implements Serializable {
     public String getType(){
         return _type;
     }
-    public String getData(){
-        return _data;
+    public Transaction getData(){
+        return _transaction;
     }
 }
