@@ -1,5 +1,7 @@
 package SystemUtils;
 
+import Utils.JsonSerializer;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -72,17 +74,17 @@ public class ServerClientBase {
     public void sendMessage(MessageBase msgToSend){
         String host = LOCAL_HOST;
         try (   final Socket peer = new Socket(host, msgToSend._receiverPort);
-                final ObjectOutputStream out = new ObjectOutputStream(peer.getOutputStream());
-                final ObjectInputStream in = new ObjectInputStream(peer.getInputStream())) {
-            Object fromPeer;
-            while ((fromPeer = in.readObject()) != null) {
-                if (fromPeer instanceof MessageBase) {
-                    final MessageBase msg = (MessageBase) fromPeer;
-                    out.writeObject(msgToSend);
-                    break;
+                final ObjectOutputStream out = new ObjectOutputStream(peer.getOutputStream())){
+                //final ObjectInputStream in = new ObjectInputStream(peer.getInputStream())) {
+            //String fromPeer;
+            //while ((fromPeer = in.readLine()) != null) {
+                //if (JsonSerializer.deserialize(fromPeer.toString(), MessageBase.class) instanceof MessageBase) {
+                    //String msg =  fromPeer;
+                    out.writeObject( JsonSerializer.serialize(msgToSend));
+                    //break;
                 }
-            }
-        }
+
+
         catch (UnknownHostException e) {
             System.err.println(String.format("Unknown host %s %d", host, port));
         }
@@ -94,13 +96,11 @@ public class ServerClientBase {
                 e1.printStackTrace();
             }
         }
-        catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     // put here all the logic for dealing with messages need to be override
-    public void MessageHandler(MessageBase msg){
-        System.out.println(String.format("%d received: %s", port, msg.toString()));
+    public void MessageHandler(String msg){
+        MessageBase m = (MessageBase) JsonSerializer.deserialize(msg, MessageBase.class);
+        System.out.println(String.format("%d received: %s", port, m.toString()));
     }
 }
