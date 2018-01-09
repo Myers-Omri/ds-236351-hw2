@@ -36,6 +36,7 @@ public class GreetingController {
                                     @RequestParam(value="item") Integer item) {
         txId++;
         transaction = new Transaction(txId, item, from, to, Transaction.TransactionType.INIT_SHIPMENT);
-        log.info(format("Transaction received: ID=[%d], Item=[%d], From=[%d], To=[%d]", txId, item, from, to));
+        log.info(format("Transaction received: %s", transaction.toString()));
+        Application.server.processTransaction(transaction);
     }
 }

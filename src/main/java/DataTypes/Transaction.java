@@ -52,7 +52,7 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return Integer.toString(_transactionId);
+        return ("[ID=" + Integer.toString(_transactionId) + ", Item ID=" + Integer.toString(_itemId) + ", From ID=" + Integer.toString(_clientId) + ", To ID=" + Integer.toString(_receiverId) + "]");
     }
 
     //double data = random();
