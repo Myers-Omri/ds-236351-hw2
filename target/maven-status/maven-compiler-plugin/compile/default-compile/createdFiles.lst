@@ -11,6 +11,7 @@ BlockChain\BlockChainServer.class
 Paxos\PaxosMsgs\PromiseMsg.class
 Paxos\PaxosMsgs\PrepareMsg.class
 Paxos\Paxos$4.class
+Hello.class
 Paxos\Paxos.class
 Paxos\PaxosMsgs\CommitMsg.class
 DataTypes\Transaction.class
