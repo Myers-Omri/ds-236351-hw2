@@ -6,7 +6,8 @@ public class Transaction {
         INIT_SHIPMENT,
         LOCATION_UPDATE,
         ARRIVED,
-        COLLECTED_BY_CUSTOMER
+        COLLECTED_BY_CUSTOMER,
+        DEFAULT
     }
 
     public TransactionType _type;
@@ -30,14 +31,27 @@ public class Transaction {
     //for COLLECTED_BY_CUSTOMER:
     //public String _arrivedApproval;
 
-    Transaction(int transaction_id, int item_id, int client_id, TransactionType type ){
+    public Transaction(int transaction_id, int item_id, int client_id, TransactionType type ){
         _transactionId = transaction_id;
         _itemId = item_id;
         _clientId = client_id;
         _type = type;
     }
 
+    public Transaction(int transaction_id){
+        _transactionId = transaction_id;
+    }
+    public Transaction(){
+        _transactionId = 0;
+        _itemId = 0;
+        _clientId = 0;
+        _type = TransactionType.DEFAULT;
+    }
 
+    @Override
+    public String toString() {
+        return Integer.toString(_transactionId);
+    }
 
     //double data = random();
 
