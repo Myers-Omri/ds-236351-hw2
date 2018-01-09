@@ -10,6 +10,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.String.format;
 
@@ -18,14 +21,16 @@ public class P2PSocket {
     private int port;
     private List<String> msgs = new ArrayList<>();
     private ServerSocket socket;
-    private Socket concc;
-    private final Object lock = new Object();
+//    private Socket concc;
+//    private final Object lock = new Object();
     private boolean alive = true;
     private Thread listener;
      public P2PSocket(int _port) throws IOException {
          port = _port;
          socket = new ServerSocket(port);
      }
+    private final Semaphore sem = new Semaphore(0, true);
+//    private Lock global = new ReentrantLock();
 
      public void start() {
          listener = new Thread() {
@@ -34,22 +39,27 @@ public class P2PSocket {
 //                 log.info(String.format("P2P socket started on [%s]", new String(socket.getInetAddress().getAddress())));
                     while (alive) {
                         try {
-                            concc = socket.accept();
-//                            log.info(String.format("P2P socket accepted on port [%d]", port));
-                            BufferedReader in = new BufferedReader(new InputStreamReader(concc.getInputStream()));
-                            readAll(in);
-                            concc.close();
-                        } catch (IOException e) {
-                            alive = false;
-                            log.info(format("socket on port [%s - %s] has closed",
-                                    concc.getLocalAddress().toString(),
-                                    concc.getRemoteSocketAddress().toString()));
+                            Socket concc = socket.accept();
+                            new Thread() {
+                                @Override
+                                public void run() {
+                                    try {
+                                    BufferedReader in = new BufferedReader(new InputStreamReader(concc.getInputStream()));
+                                    readAll(in);
+                                    if (msgs.size() > 0) {
+                                        sem.release();
+                                        log.info(format("notify on port [%d]", port));
+
+                                    }
+                                    concc.close();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }.start();
+                        }catch (IOException e) {
+                            e.printStackTrace();
                         }
-                        if (msgs.size() > 0) {
-                             synchronized(lock) {
-                                 lock.notify();
-                             }
-                         }
                     }
              }
          };
@@ -72,14 +82,14 @@ public class P2PSocket {
 
     public List<String> getMsgs() {
          while (msgs.size() == 0) {
+             log.info(format("massages size is 0 on port [%d]", port));
              try {
-                 synchronized(lock) {
-                     lock.wait();
-                 }
+                 sem.acquire();
              } catch (InterruptedException e) {
                  return Collections.emptyList();
              }
          }
+        log.info(format("massages size is [%d] on port [%d]",msgs.size(), port));
          List<String> ret = msgs;
          msgs = new ArrayList<>();
         return ret;
@@ -88,7 +98,7 @@ public class P2PSocket {
     public void close() {
         alive = false;
         try {
-            concc.close();
+//            concc.close();
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -105,12 +115,17 @@ public class P2PSocket {
              }
          } catch (Exception e) {
              e.printStackTrace();
+             return;
          }
-
     }
 
     public void clear() {
          msgs = new ArrayList<>();
+    }
+
+    public boolean isEmpty() {
+         boolean size = (msgs.size() == 0);
+         return size;
     }
 }
 

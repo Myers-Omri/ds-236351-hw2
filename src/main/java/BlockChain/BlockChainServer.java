@@ -23,7 +23,7 @@ public class BlockChainServer {
     private int id;
     Paxos consensus = null;
 
-    private Map<String, P2PSocket> p2pSockets = new HashMap<>();
+    public Map<String, P2PSocket> p2pSockets = new HashMap<>();
     private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(10);
     private ServerSocket clientSocket;
 
@@ -36,7 +36,7 @@ public class BlockChainServer {
     public BlockChainServer(final String name, final String address, final DataTypes.Block root,
                             int id, int p_num) throws IOException {
         Random ran = new Random();
-        int x = ran.nextInt(6) + 5;
+        int x = ran.nextInt(3);
         log.info(format("[%d] Host will wait %d seconds before starting", getId(), x));
         try {
             Thread.sleep(x * 1000);
@@ -67,7 +67,7 @@ public class BlockChainServer {
             log.info(format("[%d] Host initiate consensus", getId()));
         }
         try {
-            Thread.sleep(5 * 1000);
+            Thread.sleep(3 * 1000);
             log.info(format("[%d] Host started on address [%s]", getId(), getAddress()));
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -115,7 +115,7 @@ public class BlockChainServer {
     public void broadcast(String msg, String type) {
         List<Peer> members = new ArrayList<>();
         for (String s : MembershipDetectore.getMembers()) {
-            log.info(format("[%d] see [%s] as member", Config.id, s));
+//            log.info(format("[%d] see [%s] as member", Config.id, s));
             members.add((Peer) JsonSerializer.deserialize(s, Peer.class));
         }
         for (Peer p : members) {
@@ -128,7 +128,7 @@ public class BlockChainServer {
         try {
 //            String host = p.addr;
 //            int port = p.ports.get(type);
-            log.info(format("[%d] trying to send a massage to (%s:%d)", getId(), host, port));
+            log.info(format("[%d] trying to send a massage  to (%s:%d)", getId(), host, port));
             Socket peer = new Socket(host, port);
             DataOutputStream  out = new DataOutputStream (peer.getOutputStream());
             out.writeBytes(msg);
@@ -144,31 +144,22 @@ public class BlockChainServer {
     }
 
     public List<String> receiveMessage(String type) {
+        log.info(format("[%d] try to receive a massage on (%s:%s)", getId(), getAddress(), type));
         List<String> ret = p2pSockets.get(type).getMsgs();
         log.info(format("[%d] received a massage on (%s:%s)", getId(), getAddress(), type));
         return ret;
     }
-    //    public String receiveSingleMsg(String type) {
-//        log.info(format("[%d] try to receive a massage on (%s:%s)--", getId(), getAddress(), type));
-//        String ret = p2pSockets.get(type).getFirstMsg();
-//        log.info(format("[%d] received a massage on (%s:%s)--", getId(), getAddress(), type));
-//        return ret;
-//    }
+
     public Block propose(Block b) {
         return consensus.propose(b).get(0);
     }
-//    public void testOneTimePaxos() {
-//        DataTypes.Block b = new Block(0);
-//        b.addTransaction(new TestTransaction());
-//        LeaderFailureDetector.start(format("%s:%d", getAddress(), getId()));
-//        Paxos p = new Paxos(this, (pNum / 2) + 1);
-//        DataTypes.Block b1 = p.propose(b);
-//        p.stopPaxos();
-//        log.info(format("block [%d] accepted", b1.prevBlockHash));
-//        try {
-//            LeaderFailureDetector.close();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//    }
+
+    public void sleep(int seconds) {
+        try {
+            log.info(format("[%d] will sleep for [%d] seconds", Config.id, seconds));
+            Thread.sleep(1000 * seconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -30,6 +30,7 @@ public class ServerThreadBase extends Thread{
             while ((fromClient = in.readLine()) != null) {
                 if (JsonSerializer.deserialize(fromClient.toString(), MessageBase.class) instanceof MessageBase){
                      String msg = fromClient;
+
                     messageHandler(msg);
                     break;
                 }

@@ -84,22 +84,25 @@ public class Paxos {
         return new Thread() {
             @Override
             public void run() {
-                log.info("starting receive phase");
+                log.info(format("starting receive phase round [%d]", paxosRound));
                 while (!decided) {
-                    prepareMsgsQueue.addAll(server.receiveMessage(PaxosMassegesTypes.PREPARE));
+                    if (!server.p2pSockets.get(PaxosMassegesTypes.PREPARE).isEmpty() || prepareMsgsQueue.isEmpty()) {
+                        prepareMsgsQueue.addAll(server.receiveMessage(PaxosMassegesTypes.PREPARE));
+                    }
                     List<String> removed = new ArrayList<>();
                     for (String msg : prepareMsgsQueue) {
                         PrepareMsg m = (PrepareMsg) JsonSerializer.deserialize(msg, PrepareMsg.class);
                         if (m.round > paxosRound) {
                             continue;
                         }
-                        if (m.serverID == getLeaderID()) {
+//                        if (m.serverID == getLeaderID()) {
                             removed.add(msg);
                             if (m.round < paxosRound) {
-                                log.info(format("corrupted PREPARE message from [%s]:[%s]", m.serverAddr, JsonSerializer.serialize(v)));
+//                                log.info(format("corrupted PREPARE message from [%s]:[%s]", m.serverAddr, JsonSerializer.serialize(v)));
                                 continue;
                             }
-                            log.info(format("got a PREPARE message with r=%d, lastRound=%d from server [%s]", m.r, lastRound, m.serverID));
+                            log.info(format("got a PREPARE message with r=%d, lastRound=%d from server [%s] on round=[%d]"
+                                    , m.r, lastRound, m.serverID, paxosRound));
                             if (m.r > lastRound) {
                                 server.sendMessage(
                                         JsonSerializer.serialize(
@@ -117,10 +120,11 @@ public class Paxos {
 //                                break;
                             }
 
-                        }
+//                        }
                     }
                     prepareMsgsQueue.removeAll(removed);
                 }
+                log.info(format("end receive phase round [%d]", paxosRound));
             }
         };
     }
@@ -129,21 +133,23 @@ public class Paxos {
         return new Thread() {
             @Override
             public void run() {
-                log.info("starting accept phase");
+                log.info(format("starting accept phase round [%d]", paxosRound));
                 while(!decided) {
-                    acceptMsgsQueue.addAll(server.receiveMessage(PaxosMassegesTypes.ACCEPT));
+                    if (!server.p2pSockets.get(PaxosMassegesTypes.ACCEPT).isEmpty() || acceptMsgsQueue.isEmpty()) {
+                        acceptMsgsQueue.addAll(server.receiveMessage(PaxosMassegesTypes.ACCEPT));
+                    }
                     List<String> removed = new ArrayList<>();
                     for (String msg : acceptMsgsQueue) {
                         AcceptMsg m = (AcceptMsg) JsonSerializer.deserialize(msg, AcceptMsg.class);
                         if (m.round > paxosRound) {
                             continue;
                         }
-                        if (m.serverID == getLeaderID()) {
-                            log.info(format("got an ACCEPT message with r=%d, lastRound=%d from server [%s]",
-                                    m.r, lastRound, m.serverID));
+//                        if (m.serverID == getLeaderID()) {
+                            log.info(format("got an ACCEPT message with r=%d, lastRound=%d from server [%s] on round [%d]",
+                                    m.r, lastRound, m.serverID, paxosRound));
                             removed.add(msg);
                             if (m.round < paxosRound) {
-                                log.info(format("corrupted ACCEPT message from [%s]:[%s]", m.serverAddr, JsonSerializer.serialize(v)));
+//                                log.info(format("corrupted ACCEPT message from [%s]:[%s]", m.serverAddr, JsonSerializer.serialize(v)));
                                 continue;
                             }
 
@@ -163,9 +169,10 @@ public class Paxos {
                                         m.serverAddr, m.accepted_port);
                             }
                         }
-                    }
+//                    }
                     acceptMsgsQueue.removeAll(removed);
                 }
+                log.info(format("end accept phase round [%d]", paxosRound));
             }
         };
     }
@@ -174,30 +181,35 @@ public class Paxos {
         return new Thread() {
             @Override
             public void run() {
-                log.info("starting commit phase");
+                log.info(format("starting commit phase round [%d]", paxosRound));
                 while (!decided) {
-                    commitMsgsQueue.addAll(server.receiveMessage(PaxosMassegesTypes.COMMIT));
+                    if (!server.p2pSockets.get(PaxosMassegesTypes.COMMIT).isEmpty() || commitMsgsQueue.isEmpty()) {
+                        commitMsgsQueue.addAll(server.receiveMessage(PaxosMassegesTypes.COMMIT));
+                    }
 //                    String cmsg = server.receiveSingleMsg(PaxosMassegesTypes.COMMIT);
                     List<String> removed = new ArrayList<>();
                     for (String msg : commitMsgsQueue) {
                         CommitMsg m = (CommitMsg) JsonSerializer.deserialize(msg, CommitMsg.class);
+                        if (m.round > paxosRound) continue;
                         removed.add(msg);
                         if (m.round < paxosRound) {
-                            log.info(format("corrupted COMMIT message from [%s]:[%s]", m.serverAddr, JsonSerializer.serialize(v)));
+                            log.info(format("corrupted COMMIT message from [%s]:[%s]", m.serverAddr, JsonSerializer.serialize(m.blocks)));
                             continue;
                         }
-                        log.info(format("got a COMMIT message from [%s]:[%s]", m.serverAddr, JsonSerializer.serialize(v)));
                         v = m.blocks;
                         decided = true;
+                        log.info(format("got a COMMIT message from [%s]:[%s] and decided on round [%d]",
+                                m.serverAddr, JsonSerializer.serialize(v), paxosRound));
                         server.broadcast(JsonSerializer.serialize(new CommitMsg(Config.id, lastGoodRound, v,
                                         server.getBCLength(), Config.addr, paxosRound)),
                                 PaxosMassegesTypes.COMMIT); // TODO: remove that on real bc
                         acceptorsThreads.get(0).interrupt();
                         acceptorsThreads.get(1).interrupt();
-                        return;
+                        break;
                     }
                     commitMsgsQueue.removeAll(removed);
                 }
+                log.info(format("end commit phase round [%d]", paxosRound));
             }
         };
     }
@@ -217,6 +229,7 @@ public class Paxos {
             }
         };
     }
+
     private void proposerPhase() {
         while (!decided) {
             if (!(Integer.parseInt(LeaderFailureDetector.getCurrentLeader().split(":")[1]) == server.getId())) {
@@ -226,28 +239,32 @@ public class Paxos {
                     e.printStackTrace();
                 }
             } else {
-                log.info(format("[%d] starting proposer phase", server.getId()));
+                log.info(format("[%d] starting proposer phase round [%d]", server.getId(), paxosRound));
                 r = lastRound + 1;
                 /* FIRST PHASE */
                 server.broadcast(JsonSerializer.serialize(new PrepareMsg(server.getId(), r, server.getBCLength(),
                         Config.addr, Config.l_promise, paxosRound)), PaxosMassegesTypes.PREPARE);
-                log.info(format("[%d] leader has broadcast PREPARE MSG", server.getId()));
+                log.info(format("[%d] leader has broadcast PREPARE MSG round [%d]", server.getId(), paxosRound));
                 List<PromiseMsg> promSet = new ArrayList<>();
 //        promSet.add( new PromiseMsg(server.getId(), r, PaxosMassegesTypes.ACK, lastGoodRound,
 //                v, server.getBCLength(), server.getAddress()));
                 while (promSet.size() < qSize) {
-                    promiseMsgsQueue.addAll(server.receiveMessage(PaxosMassegesTypes.PROMISE));
+                    if (!server.p2pSockets.get(PaxosMassegesTypes.PROMISE).isEmpty() || promiseMsgsQueue.isEmpty()) {
+                        promiseMsgsQueue.addAll(server.receiveMessage(PaxosMassegesTypes.PROMISE));
+                    }
                     List<String> removed = new ArrayList<>();
                     for (String msg: promiseMsgsQueue) {
+                        if (promSet.size() >= qSize) break;
                         PromiseMsg pmsg = (PromiseMsg) JsonSerializer.deserialize(msg, PromiseMsg.class);
                         if (pmsg.round > paxosRound) continue; //TODO: should be change??
                         removed.add(msg);
                         if (pmsg.round < paxosRound) {
-                            log.info(format("corrupted PROMISE message from [%s]:[%s]", pmsg.serverAddr, JsonSerializer.serialize(v)));
+//                            log.info(format("corrupted PROMISE message from [%s]:[%s]", pmsg.serverAddr, JsonSerializer.serialize(v)));
                             continue;
                         }
                         if (pmsg.type.equals(PaxosMassegesTypes.PROMISE)) { //TODO: add support in rounds of paxos
-                            log.info(format("[%d] leader has accepted PROMISE message", server.getId()));
+                            log.info(format("[%d] leader has accepted PROMISE message from [%d] on round [%d]",
+                                    server.getId(), pmsg.serverID, paxosRound));
                             promSet.add(pmsg);
                         }
                     }
@@ -261,23 +278,28 @@ public class Paxos {
                 v = selectVal(promSet);
                 server.broadcast(JsonSerializer.serialize(new AcceptMsg(server.getId(), r, v, server.getBCLength(),
                         server.getAddress(), Config.l_accepted, paxosRound)), PaxosMassegesTypes.ACCEPT);
+                log.info(format("[%d] leader has broadcast PREPARE MSG round [%d]", server.getId(), paxosRound));
                 /* THIRD PHASE */
                 List<AcceptedMsg> acceptedSet = new ArrayList<>();
 //        acceptedSet.add( new AcceptedMsg(server.getId(), r, PaxosMassegesTypes.ACK,
 //                server.getBCLength(), server.getAddress()));
                 while (acceptedSet.size() < qSize) {
-                    acceptedMsgsQueue.addAll(server.receiveMessage(PaxosMassegesTypes.ACCEPTED));
+                    if (!server.p2pSockets.get(PaxosMassegesTypes.ACCEPTED).isEmpty() || acceptedMsgsQueue.isEmpty()) {
+                        acceptedMsgsQueue.addAll(server.receiveMessage(PaxosMassegesTypes.ACCEPTED));
+                    }
                     List<String> removed = new ArrayList<>();
                     for (String msg: acceptedMsgsQueue) {
+                        if (acceptedSet.size() >= qSize) break;
                         AcceptedMsg amsg = (AcceptedMsg) JsonSerializer.deserialize(msg, AcceptedMsg.class);
                         if (amsg.round > paxosRound) continue;
                         removed.add(msg);
                         if (amsg.round < paxosRound) {
-                            log.info(format("corrupted ACCEPTED message from [%s]:[%s]", amsg.serverAddr, JsonSerializer.serialize(v)));
+//                            log.info(format("corrupted ACCEPTED message from [%s]:[%s]", amsg.serverAddr, JsonSerializer.serialize(v)));
                             continue;
                         }
                         if (amsg.type.equals(PaxosMassegesTypes.ACCEPTED)) { //TODO: add support in rounds of paxos
-                            log.info(format("[%d] leader has accepted ACCEPTED message", server.getId()));
+                            log.info(format("[%d] leader has accepted ACCEPTED message from [%d] on round [%d]"
+                                    , server.getId(), amsg.serverID, paxosRound));
                             acceptedSet.add(amsg);
                         }
                     }
@@ -289,25 +311,26 @@ public class Paxos {
                 if (acceptedSet.size() < qSize) continue;
                 server.broadcast(JsonSerializer.serialize(new CommitMsg(server.getId(), r, v, server.getBCLength(),
                         server.getAddress(), paxosRound)), PaxosMassegesTypes.COMMIT); // TODO: r-cast???
-                log.info(format("[%d] leader has broadcast COMMIT message [%s]", Config.id, JsonSerializer.serialize(v)));
+                log.info(format("[%d] leader has broadcast COMMIT message [%s] of round [%d]",
+                        Config.id, JsonSerializer.serialize(v), paxosRound));
                 decided = true;
                 return;
             }
         }
     }
 
-    private boolean ValidateQuorum(int size) {
-        log.info(format("[%d] leader has accepted %d messages", server.getId(), size));
-        if (size < qSize) {
-            try {
-                LeaderFailureDetector.yelidLeaderShip(server.getAddress(), server.getId()); // Gives up on leadership
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return true;
-        }
-        return false;
-    }
+//    private boolean ValidateQuorum(int size) {
+//        log.info(format("[%d] leader has accepted %d messages", server.getId(), size));
+//        if (size < qSize) {
+//            try {
+//                LeaderFailureDetector.yelidLeaderShip(server.getAddress(), server.getId()); // Gives up on leadership
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//            return true;
+//        }
+//        return false;
+//    }
 
     private List<Block> selectVal(List<PromiseMsg> promSet) {
         int maxLGR = promSet.stream().max(Comparator.comparingInt(m1 -> m1.lastGoodRound)).get().lastGoodRound;

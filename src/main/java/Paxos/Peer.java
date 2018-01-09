@@ -18,6 +18,6 @@ public class Peer {
         ports.put(PaxosMassegesTypes.ACCEPT, a_accept);
         ports.put(PaxosMassegesTypes.COMMIT, a_commit);
         ports.put(PaxosMassegesTypes.PROMISE, l_promise);
-        ports.put(PaxosMassegesTypes.ACCEPTED, a_accept);
+        ports.put(PaxosMassegesTypes.ACCEPTED, l_accepted);
     }
 }

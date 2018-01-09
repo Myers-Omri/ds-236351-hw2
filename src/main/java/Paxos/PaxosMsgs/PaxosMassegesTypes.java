@@ -8,5 +8,4 @@ public class PaxosMassegesTypes {
     static public String COMMIT = "COMMIT";
     static public String ACK = "ACK";
     static public String NACK = "NACK";
-    static public String LATE_SERVER = "LATE_SERVER";
 }
