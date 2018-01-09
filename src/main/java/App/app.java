@@ -18,7 +18,7 @@ public class app {
         Config.init();
         SystemUtils.init();
         try {
-            s = new BlockChainServer(Config.s_name, Config.addr, new Block(0), Config.id, Config.p_num);
+            s = new BlockChainServer(Config.s_name, Config.addr, new Block(0), Config.p_num);
         } catch (IOException e) {
             e.printStackTrace();
         }
