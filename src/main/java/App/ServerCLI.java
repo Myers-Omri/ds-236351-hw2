@@ -10,7 +10,6 @@ import org.apache.commons.cli.*;
 
 
 public class ServerCLI {
-    private static final Logger log = Logger.getLogger(ServerCLI.class.getName());
     private String[] args = null;
     private Options options = new Options();
 
@@ -50,7 +49,7 @@ public class ServerCLI {
             }
             if (in[0].equals("kill")) {
                 kill();
-                log.info("killing the server has finished successfully");
+                System.out.println("killing the server has finished successfully");
             }
             if (in[0].equals("exit")) {
                 exit();

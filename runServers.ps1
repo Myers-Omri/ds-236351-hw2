@@ -1,4 +1,4 @@
-﻿for ($i = 0 ; $i -le 9 ; $i++) {
+﻿for ($i = 0 ; $i -le 10 ; $i++) {
     $serversClusterFolder = "..\BCServersCluster"
     $servers = ls ..\BCServersCluster
     cd $serversClusterFolder
@@ -11,6 +11,5 @@
     $proc_ids = @()
     $procs | % { $proc_ids += $_.Id }
     Wait-Process $proc_ids
-    Start-Sleep -Seconds 5
     cd $path
 }

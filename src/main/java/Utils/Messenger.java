@@ -34,37 +34,43 @@ public class Messenger {
     }
 
     public Object receiveAcceptorMsg(int pNum) {
-        log.info(format("start receiveAcceptorMsg on round [%d]", pNum));
+//        log.info(format("start receiveAcceptorMsg on round [%d]", pNum));
         if (!aIn.isEmpty() || aInBuf.isEmpty()) {
             aInBuf.addAll(aIn.getMsgs());
         }
-        log.info(format("received [%d] massages", aInBuf.size()));
+//        log.info(format("received [%d] massages", aInBuf.size()));
         Object ret = null;
         List<String> remove = new ArrayList<>();
         for (String msg : aInBuf) {
             if (msg.contains(PREPARE)) {
-                log.info(format("received PREPARE massage"));
                 PrepareMsg aMsg = (PrepareMsg)deserialize(msg, PrepareMsg.class);
                 if (aMsg.round > pNum) continue;
                 remove.add(msg);
-                ret = aMsg;
-                break;
+                if (aMsg.round == pNum) {
+                    log.info(format("received PREPARE massage on round [%d]", pNum));
+                    ret = aMsg;
+                    break;
+                }
             }
             if (msg.contains(ACCEPT)) {
-                log.info(format("received ACCEPT massage"));
                 AcceptMsg aMsg = (AcceptMsg)deserialize(msg, AcceptMsg.class);
                 if (aMsg.round > pNum) continue;
                 remove.add(msg);
-                ret = aMsg;
-                break;
+                if (aMsg.round == pNum) {
+                    log.info(format("received ACCEPT massage on round [%d]", pNum));
+                    ret = aMsg;
+                    break;
+                }
             }
             if (msg.contains(COMMIT)) {
-                log.info(format("received COMMIT massage"));
                 CommitMsg aMsg = (CommitMsg)deserialize(msg, CommitMsg.class);
                 if (aMsg.round > pNum) continue;
                 remove.add(msg);
-                ret = aMsg;
-                break;
+                if (aMsg.round == pNum) {
+                    log.info(format("received COMMIT massage on round [%d]", pNum));
+                    ret = aMsg;
+                    break;
+                }
             }
         }
         aInBuf.removeAll(remove);
@@ -72,7 +78,7 @@ public class Messenger {
     }
 
     public Object receiveLeaderMsg(int pNum) {
-        log.info(format("start receiveLeaderMsg on round [%d]", pNum));
+//        log.info(format("start receiveLeaderMsg on round [%d]", pNum));
         if (!lIn.isEmpty() || lInBuf.isEmpty()) {
             lInBuf.addAll(lIn.getMsgs());
         }
@@ -80,20 +86,24 @@ public class Messenger {
         List<String> remove = new ArrayList<>();
         for (String msg : lInBuf) {
             if (msg.contains(PROMISE)) {
-                log.info(format("received PROMISE massage"));
                 PromiseMsg aMsg = (PromiseMsg)deserialize(msg, PromiseMsg.class);
                 if (aMsg.round > pNum) continue;
                 remove.add(msg);
-                ret = aMsg;
-                break;
+                if (aMsg.round == pNum) {
+                    log.info(format("received PROMISE massage on round [%d]", pNum));
+                    ret = aMsg;
+                    break;
+                }
             }
             if (msg.contains(ACCEPTED)) {
-                log.info(format("received ACCEPTED massage"));
                 AcceptedMsg aMsg = (AcceptedMsg)deserialize(msg, AcceptedMsg.class);
                 if (aMsg.round > pNum) continue;
                 remove.add(msg);
-                ret = aMsg;
-                break;
+                if (aMsg.round == pNum) {
+                    log.info(format("received ACCEPTED massage on round [%d]", pNum));
+                    ret = aMsg;
+                    break;
+                }
             }
         }
         lInBuf.removeAll(remove);
@@ -110,19 +120,20 @@ public class Messenger {
             out.writeBytes(msg);
             peer.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("[Exception] ",e);
         }
         log.info(format("send a massage [%s] to [%s:%d]",msg, host, port));
     }
 
-    public void broadcast(String msg) {
+    public void broadcastToAcceptors(String msg, int excludeID) {
         List<Peer> members = new ArrayList<>();
         for (String s : MembershipDetectore.getMembers()) {
-//            log.info(format("[%d] see [%s] as member", Config.id, s));
             members.add((Peer) JsonSerializer.deserialize(s, Peer.class));
         }
         for (Peer p : members) {
-            sendMsg(msg, p.addr, p.aPort);
+            if (p.id != excludeID) {
+                sendMsg(msg, p.addr, p.aPort);
+            }
         }
     }
     public void close() {

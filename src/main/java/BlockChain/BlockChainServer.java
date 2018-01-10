@@ -16,12 +16,12 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import static java.lang.String.format;
 
 public class BlockChainServer {
+    private int paxsosNum = 0;
     private String name;
     private String address;
     private int pNum;
     private List<DataTypes.Block> blockchain = new ArrayList<>();
     public Messenger msn;
-    Paxos consensus = null;
     public Map<String, P2PSocket> p2pSockets = new HashMap<>();
     private static Logger log = Logger.getLogger(BlockChainServer.class.getName());
 
@@ -29,12 +29,12 @@ public class BlockChainServer {
     public BlockChainServer(final String name, final String address, final DataTypes.Block root,
                              int p_num) throws IOException {
         Random ran = new Random();
-        int x = ran.nextInt(3);
+        int x = ran.nextInt(2) + 4; //TODO: remove for production
         log.info(format("[%d] Host will wait %d seconds before starting", Config.id, x));
         try {
             Thread.sleep(x * 1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.info("[Exception] ", e);
         }
         this.name = name;
         this.address = address;
@@ -46,15 +46,11 @@ public class BlockChainServer {
         msn = new Messenger(new P2PSocket(Config.aPort), new P2PSocket(Config.lPort));
         LeaderFailureDetector.start(format("%s:%d", getAddress(), getId()));
         log.info(format("[%d] Host started Leader Failure detector", getId()));
-        if (consensus == null) {
-            consensus = new Paxos(this, (pNum / 2) + 1, getBCLength());
-            log.info(format("[%d] Host initiate consensus", getId()));
-        }
         try {
             Thread.sleep(5 * 1000);
             log.info(format("[%d] Host started on address [%s]", getId(), getAddress()));
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.info("[Exception] ", e);
         }
     }
     public int getId() {return Config.id;}
@@ -70,20 +66,22 @@ public class BlockChainServer {
         return blockchain;
     }
     public void addBlock(Block b) {
+        Paxos consensus = new Paxos(this, (pNum / 2) + 1, paxsosNum);
         List<Block> bl = consensus.propose(b);
         blockchain.addAll(bl);
+        consensus.stopPaxos();
+        paxsosNum++;
     }
     public boolean validateBlock(Block b, List<Block> bl) {
         return true;
     }
     public void stopHost() {
         try {
-            consensus.stopPaxos();
             MembershipDetectore.close();
             LeaderFailureDetector.close();
             msn.close();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.info("[Exception] ", e);
         }
     }
     public Block getBlock(int i) {
@@ -95,7 +93,10 @@ public class BlockChainServer {
     }
 
     public Block propose(Block b) {
-        return consensus.propose(b).get(0);
+        Paxos consensus = new Paxos(this, (pNum / 2) + 1, getBCLength());
+        Block res = consensus.propose(b).get(0);
+        consensus.stopPaxos();
+        return res;
     }
 
     public void sleep(int seconds) {
@@ -103,7 +104,7 @@ public class BlockChainServer {
             log.info(format("[%d] will sleep for [%d] seconds", Config.id, seconds));
             Thread.sleep(1000 * seconds);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.info("[Exception] ", e);
         }
     }
 }

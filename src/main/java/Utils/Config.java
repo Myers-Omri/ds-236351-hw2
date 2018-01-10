@@ -1,9 +1,9 @@
 package Utils;
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Properties;
 
@@ -30,7 +30,7 @@ public class Config {
         lPort = Integer.parseInt(props.getProperty("L_PORT"));
         aPort = Integer.parseInt(props.getProperty("A_PORT"));
         } catch (Exception e) {
-            e.printStackTrace();
+                e.printStackTrace();
         }
 
     }

@@ -51,12 +51,12 @@ public class P2PSocket {
                                     readAll(in);
                                     concc.close();
                                     } catch (IOException e) {
-                                        e.printStackTrace();
+                                        log.info("[Exception] ",e);
                                     }
                                 }
                             }.start();
                         }catch (IOException e) {
-                            e.printStackTrace();
+                            log.info("[Exception] ",e);
                         }
                     }
              }
@@ -74,7 +74,7 @@ public class P2PSocket {
          ret = msgs;
          msgs = new ArrayList<>();
          } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.info("[Exception] ",e);
         } finally {
             lock.unlock();
         }
@@ -86,7 +86,7 @@ public class P2PSocket {
         try {
             socket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info("[Exception] ",e);
         }
 
         listener.interrupt();
@@ -103,7 +103,7 @@ public class P2PSocket {
                  notEmpty.signalAll();
 //             }
          } catch (Exception e) {
-             e.printStackTrace();
+             log.info("[Exception] ",e);
          } finally {
              lock.unlock();
          }
