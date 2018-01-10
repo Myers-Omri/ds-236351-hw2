@@ -1,6 +1,7 @@
 package BlockChain;
 
 import DataTypes.Block;
+import DataTypes.Transaction;
 import Paxos.Paxos;
 import Paxos.PaxosMsgs.PaxosMassegesTypes;
 import Utils.*;
@@ -22,6 +23,8 @@ public class BlockChainServer {
     private List<DataTypes.Block> blockchain = new ArrayList<>();
     private int id;
     Paxos consensus = null;
+
+    private Block currentBlock;
 
     public Map<String, P2PSocket> p2pSockets = new HashMap<>();
     private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(10);
@@ -73,6 +76,8 @@ public class BlockChainServer {
             e.printStackTrace();
         }
         listening = true;
+
+        currentBlock = new Block(1); //TODO - this is merely a placeholder, need to address block-generation-cycles
     }
     public void clearSocket(String s) {
         p2pSockets.get(s).clear();
@@ -161,5 +166,10 @@ public class BlockChainServer {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void processTransaction(Transaction tx) {
+        log.info(format("Transaction received by server: %s", tx.toString()));
+        currentBlock.addTransaction(tx);
     }
 }
