@@ -103,12 +103,16 @@ public class ServerCLI {
     }
     private void propose(int hash) {
         Block b = new Block(hash);
-//        b.addTransaction(new Transaction());
-//        b.addTransaction(new Transaction());
         System.out.println(JsonSerializer.serialize(app.s.propose(b)));
     }
     private void add(int hash) {
         Block b = new Block(hash);
+        Random ran = new Random();
+        int tNum = ran.nextInt(10); {
+            for (int i = 0 ; i < tNum ; i++) {
+                b.addTransaction(new Transaction());
+            }
+        }
 //        b.addTransaction(new Transaction());
 //        b.addTransaction(new Transaction());
         app.s.addBlock(b);
