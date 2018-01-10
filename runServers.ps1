@@ -1,8 +1,13 @@
-﻿for ($i = 0 ; $i -le 10 ; $i++) {
-    $serversClusterFolder = "..\BCServersCluster"
-    $servers = ls ..\BCServersCluster
-    cd $serversClusterFolder
-    $path = (Get-Item -Path .\).FullName
+﻿$serversClusterFolder = "..\BCServersCluster"
+$servers = ls ..\BCServersCluster
+cd $serversClusterFolder
+$path = (Get-Item -Path .\).FullName
+for ($i = 0 ; $i -le 10 ; $i++) {
+    $servers | % {
+        rm $path\$_\outputs\out_$i.txt
+    }
+}
+for ($i = 0 ; $i -le 10 ; $i++) {
     $procs = @()
     $servers | % { 
        cd $path\$_
