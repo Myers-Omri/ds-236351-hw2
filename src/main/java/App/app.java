@@ -15,15 +15,15 @@ import java.util.List;
 public class app {
     static public BlockChainServer s;
     public static  void init() {
-        Config.init();
-        SystemUtils.init();
         try {
-            s = new BlockChainServer(Config.s_name, Config.addr, new Block(0), Config.id, Config.p_num);
+            s = new BlockChainServer(Config.s_name, Config.addr, new Block(0), Config.p_num);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     public static void main(String args[]) throws IOException {
+        Config.init();
+        SystemUtils.init();
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String command;
         while ((command = br.readLine()) != null) {
