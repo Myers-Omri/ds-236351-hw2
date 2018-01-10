@@ -1,6 +1,8 @@
 package DataTypes;
 
 
+import java.util.Random;
+
 public class Transaction {
     public enum TransactionType {
         INIT_SHIPMENT,
@@ -8,7 +10,7 @@ public class Transaction {
         ARRIVED,
         COLLECTED_BY_CUSTOMER
     }
-
+    public int forTest;
     public TransactionType _type;
     public int _transactionId;
     public int _clientId; //external client- the one that uses ds-shipping service
@@ -29,7 +31,10 @@ public class Transaction {
 
     //for COLLECTED_BY_CUSTOMER:
     //public String _arrivedApproval;
-
+    public Transaction() {
+        Random ran = new Random();
+        forTest = ran.nextInt(100);
+    }
     Transaction(int transaction_id, int item_id, int client_id, TransactionType type ){
         _transactionId = transaction_id;
         _itemId = item_id;
