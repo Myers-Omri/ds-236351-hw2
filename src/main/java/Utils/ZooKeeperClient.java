@@ -15,9 +15,6 @@ public class ZooKeeperClient {
     private ZooKeeper zoo;
     private static Logger log = Logger.getLogger(ZooKeeperClient.class.getName());
 
-//    static void logDebugData(String data) {
-//        log.debug("[" +String.valueOf(getPID()) + "]" + data);
-//    }
 
     // Method to connect zookeeper ensemble.
     public static ZooKeeperClient connect(String host, Watcher watch) throws IOException,InterruptedException {
