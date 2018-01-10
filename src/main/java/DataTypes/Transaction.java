@@ -33,10 +33,10 @@ public class Transaction {
 
     //for COLLECTED_BY_CUSTOMER:
     //public String _arrivedApproval;
-    public Transaction() {
-        Random ran = new Random();
-        forTest = ran.nextInt(100);
-    }
+//    public Transaction() {
+//        Random ran = new Random();
+//        forTest = ran.nextInt(100);
+//    }
 
     public Transaction(int transaction_id, int item_id, int client_id, int receiver_id, TransactionType type ){
         _transactionId = transaction_id;

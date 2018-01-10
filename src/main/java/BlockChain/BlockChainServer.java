@@ -58,7 +58,6 @@ public class BlockChainServer {
         } catch (InterruptedException e) {
             log.info("[Exception] ", e);
         }
-        listening = true;
 
         currentBlock = new Block(1); //TODO - this is merely a placeholder, need to address block-generation-cycles
     }

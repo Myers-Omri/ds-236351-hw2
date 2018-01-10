@@ -9,7 +9,6 @@ Paxos\PaxosWatcher.class
 BlockChain\BlockChainServer.class
 Paxos\PaxosMsgs\PromiseMsg.class
 Paxos\PaxosMsgs\PrepareMsg.class
-Paxos\Paxos$4.class
 Hello.class
 Paxos\Paxos.class
 Paxos\PaxosMsgs\CommitMsg.class
@@ -19,6 +18,7 @@ Paxos\PaxosMsgs\PaxosMsg.class
 Paxos\Peer.class
 Utils\P2PSocket.class
 Utils\SystemUtils.class
+Utils\Messenger.class
 Utils\JsonSerializer.class
 Paxos\PaxosMsgs\AcceptedMsg.class
 Paxos\PaxosMsgs\PaxosMassegesTypes.class
