@@ -22,7 +22,7 @@ public class MembershipDetectore {
             register(data, name);
 //            updateMembers();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("[Exception] ",e);
         }
     }
     static public void connect() throws IOException, InterruptedException {
@@ -39,13 +39,6 @@ public class MembershipDetectore {
         zoo.createNode(root + "/" + name, msg.getBytes(), CreateMode.EPHEMERAL_SEQUENTIAL);
     }
 
-//    static public void updateMembers() throws KeeperException, InterruptedException {
-//        List<String> children = zoo.getChildren(root, new MembershipWatcher(), null);
-//        for (String leader : children) {
-//            members.add(new String(zoo.getData(root + "/" + leader, new MembershipWatcher() , null)));
-//        }
-//    }
-
     static public List<String> getMembers() {
         List<String> members = new ArrayList<>();
         try {
@@ -54,7 +47,7 @@ public class MembershipDetectore {
                 members.add(new String(zoo.getData(root + "/" + leader, null , null)));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("[Exception] ",e);
         }
 
         return members;
@@ -64,18 +57,3 @@ public class MembershipDetectore {
         zoo.close();
     }
 }
-
-//class MembershipWatcher implements Watcher {
-//
-//    @Override
-//    public void process(WatchedEvent watchedEvent) {
-//        final Event.EventType eventType = watchedEvent.getType();
-//        if(Event.EventType.NodeDeleted.equals(eventType)) {
-//            try {
-////                MembershipDetectore.updateMembers();
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-//}

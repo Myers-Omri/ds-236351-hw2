@@ -1,6 +1,5 @@
 Utils\P2PSocket$1.class
 App\ServerCLI.class
-Paxos\Paxos$1.class
 Utils\MembershipDetectore.class
 DataTypes\Block.class
 Utils\ZooKeeperClient.class
@@ -15,13 +14,11 @@ Hello.class
 Paxos\Paxos.class
 Paxos\PaxosMsgs\CommitMsg.class
 DataTypes\Transaction.class
-Paxos\Paxos$2.class
 Utils\LeaderFailureDetector.class
 Paxos\PaxosMsgs\PaxosMsg.class
 Paxos\Peer.class
 Utils\P2PSocket.class
 Utils\SystemUtils.class
-Paxos\Paxos$3.class
 Utils\JsonSerializer.class
 Paxos\PaxosMsgs\AcceptedMsg.class
 Paxos\PaxosMsgs\PaxosMassegesTypes.class

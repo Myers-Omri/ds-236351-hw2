@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -22,17 +23,19 @@ public class P2PSocket {
     private List<String> msgs = new ArrayList<>();
     private ServerSocket socket;
 //    private Socket concc;
-//    private final Object lock = new Object();
+//    private final Object sync = new Object();
     private boolean alive = true;
     private Thread listener;
      public P2PSocket(int _port) throws IOException {
          port = _port;
          socket = new ServerSocket(port);
      }
-    private final Semaphore sem = new Semaphore(0, true);
+//    private final Semaphore sem = new Semaphore(0, true);
 //    private Lock global = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
+    final Condition notEmpty = lock.newCondition();
 
-     public void start() {
+    public void start() {
          listener = new Thread() {
              @Override
              public void run() {
@@ -46,77 +49,66 @@ public class P2PSocket {
                                     try {
                                     BufferedReader in = new BufferedReader(new InputStreamReader(concc.getInputStream()));
                                     readAll(in);
-                                    if (msgs.size() > 0) {
-                                        sem.release();
-                                        log.info(format("notify on port [%d]", port));
-
-                                    }
                                     concc.close();
                                     } catch (IOException e) {
-                                        e.printStackTrace();
+                                        log.info("[Exception] ",e);
                                     }
                                 }
                             }.start();
                         }catch (IOException e) {
-                            e.printStackTrace();
+                            log.info("[Exception] ",e);
                         }
                     }
              }
          };
          listener.start();
      }
-//    public String getFirstMsg() {
-//        while (msgs.size() == 0) {
-//            try {
-//                synchronized(lock) {
-//                    lock.wait();
-//                }
-//            } catch (InterruptedException e) {
-//                return null;
-//            }
-//        }
-//        String ret = msgs.get(0);
-//        msgs.remove(0);
-//        return ret;
-//    }
 
     public List<String> getMsgs() {
+        lock.lock();
+        List<String> ret = new ArrayList<>();
+        try {
          while (msgs.size() == 0) {
-             log.info(format("massages size is 0 on port [%d]", port));
-             try {
-                 sem.acquire();
-             } catch (InterruptedException e) {
-                 return Collections.emptyList();
-             }
+             notEmpty.await();
          }
-        log.info(format("massages size is [%d] on port [%d]",msgs.size(), port));
-         List<String> ret = msgs;
+         ret = msgs;
          msgs = new ArrayList<>();
+         } catch (InterruptedException e) {
+            log.info("[Exception] ",e);
+        } finally {
+            lock.unlock();
+        }
         return ret;
     }
 
     public void close() {
         alive = false;
         try {
-//            concc.close();
             socket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            log.info("[Exception] ",e);
         }
 
         listener.interrupt();
     }
 
     private void readAll(BufferedReader b)  {
+        lock.lock();
          String line;
          try {
              while ((line = b.readLine()) != null) {
                  msgs.add(line);
              }
+//             synchronized (notEmpty) {
+                 notEmpty.signalAll();
+//             }
          } catch (Exception e) {
-             e.printStackTrace();
-             return;
+             log.info("[Exception] ",e);
+         } finally {
+             lock.unlock();
          }
+
+
     }
 
     public void clear() {
