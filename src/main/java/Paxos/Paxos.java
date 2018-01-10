@@ -17,35 +17,38 @@ import static Paxos.PaxosMsgs.PaxosMassegesTypes.*;
 import static Utils.JsonSerializer.deserialize;
 import static Utils.JsonSerializer.serialize;
 import static Utils.LeaderFailureDetector.getCurrentLeader;
+import static java.lang.StrictMath.max;
 import static java.lang.String.format;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
 public class Paxos {
     private int qSize;
     private BlockChainServer server;
-    private int lastGoodRound = 0;
-    private int lastRound = 0;
-    private int r = 0;
-    private int paxosNum;
-    private boolean decided = false;
-    private boolean leaderDecided = false;
-    private List<Block> v;
+    public int lastGoodRound = 0;
+    public int lastRound = 0;
+    public int r = 0;
+    public int paxosNum;
+    public boolean decided = false;
+    private List<Block> v = null;
     private ExecutorService tp = newFixedThreadPool(10);
     private static Logger log = Logger.getLogger(Paxos.class.getName());
 
-    public Paxos(BlockChainServer s, int _q_size, int _paxosNum) {
-        server = s;
-        qSize = _q_size;
-        paxosNum = _paxosNum;
+    public Paxos(BlockChainServer s, List<Block> v, int lastGoodRound, int lastRound, int _q_size, int _paxosNum) {
+        this.server = s;
+        this.qSize = _q_size;
+        this.paxosNum = _paxosNum;
+        this.lastGoodRound = lastGoodRound;
+        this.lastRound = lastRound;
+        this.v = v;
         log.info(format("Quorum size is [%d]", qSize));
+        log.info(format("PaxosNum is [%d]", paxosNum));
     }
     private void init(Block b) {
-        lastGoodRound = 0;
-        lastRound = 0;
-        r = 0;
         decided = false;
-        v = new ArrayList<Block>();
-        v.add(b);
+        if (v == null) {
+            v = new ArrayList<Block>();
+            v.add(b);
+        }
     }
 
     private void acceptorPreparePhase(PrepareMsg msg) {
@@ -77,9 +80,10 @@ public class Paxos {
     private void acceptorCommitPhase(CommitMsg msg) {
         if (!decided) {
             v = msg.blocks;
-            String strMsg = serialize(new CommitMsg(Config.id, msg.r, v, Config.addr, paxosNum));
-            server.msn.broadcastToAcceptors(strMsg, msg.serverID);
-            log.info(format("[%d] decided [%s] round [%d]", Config.id, strMsg, paxosNum));
+//            String strMsg = serialize(new CommitMsg(Config.id, v, Config.addr, paxosNum));
+//            server.msn.broadcastToAcceptors(strMsg, msg.serverID);
+            server.currentServerId = msg.serverID;
+            log.info(format("[%d] decided round [%d]", Config.id, paxosNum));
             decided = true;
         }
     }
@@ -115,18 +119,32 @@ public class Paxos {
         if (vaMsgs.size() < qSize) {
             return false;
         }
-        String strMsg = serialize(new CommitMsg(Config.id, r, v, Config.addr, paxosNum));
-        server.msn.broadcastToAcceptors(strMsg, -1);
+        String strMsg = serialize(new CommitMsg(Config.id, v, Config.addr, paxosNum));
+        server.msn.broadcastToAcceptors(strMsg, -1); //TODO: BUG alerts!!
+//        decided = true;
         return true;
     }
 
-    private void runPropose() {
+    private int runPropose() {
             tp.execute(this::runLeaderPhase);
-            acceptorPhase();
+            return acceptorPhase();
     }
-    private void acceptorPhase() {
+    private int getLeaderPhase(PaxosMsg msg) {
+        if (msg.serverID != server.currentServerId && msg.round < paxosNum) {
+            log.info(format("[%d] detected that leader has changed and that leader is on round [%d] - [%d Vs %d] type [%s]",
+                    Config.id, msg.round, msg.serverID, server.currentServerId, msg.type));
+            return msg.round;
+        }
+        return paxosNum;
+    }
+    private int acceptorPhase() {
         while (!decided) {
             Object msg = server.msn.receiveAcceptorMsg(paxosNum);
+            int leaderPhase = getLeaderPhase((PaxosMsg)msg);
+            if (leaderPhase < paxosNum) {
+                decided = true;
+                return leaderPhase;
+            }
             if (msg instanceof PrepareMsg) {
                 acceptorPreparePhase((PrepareMsg) msg);
             } else if (msg instanceof AcceptMsg) {
@@ -135,6 +153,7 @@ public class Paxos {
                 acceptorCommitPhase((CommitMsg) msg);
             }
         }
+        return paxosNum;
     }
     private void runLeaderPhase() {
         while (!decided) {
@@ -146,7 +165,11 @@ public class Paxos {
                     return;
                 }
             }
+            if (!server.isLeader) {
+                retransmitPrevBlocks();
+            }
             log.info(format("[%d] starts leader phase round [%d]", Config.id, paxosNum));
+            server.isLeader = true;
             leaderPreparePhase();
             List<PromiseMsg> pMsgs = new ArrayList<>();
             List<AcceptedMsg> aMsgs = new ArrayList<>();
@@ -173,10 +196,11 @@ public class Paxos {
         }
     }
 
-    public List<Block> propose(Block b) {
+    public PaxosDecision propose(Block b) {
         init(b);
-        runPropose(); //TODO: cleanup???
-        return v;
+        int nPaxos = runPropose(); //TODO: cleanup???
+//        stopPaxos();
+        return new PaxosDecision(v, lastGoodRound, lastRound, nPaxos);
     }
 
     private List<Block> selectVal(List<PromiseMsg> promSet) {
@@ -201,7 +225,15 @@ public class Paxos {
     public void stopPaxos() {
         tp.shutdownNow();
     }
-
+    public void retransmitPrevBlocks() {
+        int blockNum = server.decided.size();
+        int startIndex = max(0, (blockNum - 1) * (qSize - 1));
+        for (int i = startIndex ; i < blockNum ; i++) {
+            PaxosDecision d = server.decided.get(i);
+            String msgStr = serialize(new CommitMsg(Config.id, d.v, Config.addr, d.paxosNum));
+            server.msn.broadcastToAcceptors(msgStr, Config.id);
+        }
+    }
     public void setQuorum(int q) {
         qSize = q;
     }

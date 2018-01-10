@@ -2,6 +2,7 @@ package BlockChain;
 
 import DataTypes.Block;
 import Paxos.Paxos;
+import Paxos.PaxosMsgs.PaxosDecision;
 import Paxos.PaxosMsgs.PaxosMassegesTypes;
 import Utils.*;
 import Paxos.Peer;
@@ -16,13 +17,16 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import static java.lang.String.format;
 
 public class BlockChainServer {
-    private int paxsosNum = 0;
+    public int paxsosNum = 0;
     private String name;
     private String address;
     private int pNum;
+    public boolean isLeader = false;
+    public int currentServerId = Config.id;
     private List<DataTypes.Block> blockchain = new ArrayList<>();
     public Messenger msn;
     public Map<String, P2PSocket> p2pSockets = new HashMap<>();
+    public List<PaxosDecision> decided = new ArrayList<>();
     private static Logger log = Logger.getLogger(BlockChainServer.class.getName());
 
 
@@ -58,7 +62,7 @@ public class BlockChainServer {
         return name;
     }
 
-    public String getAddress() {
+    private String getAddress() {
         return address;
     }
 
@@ -66,10 +70,23 @@ public class BlockChainServer {
         return blockchain;
     }
     public void addBlock(Block b) {
-        Paxos consensus = new Paxos(this, (pNum / 2) + 1, paxsosNum);
-        List<Block> bl = consensus.propose(b);
-        blockchain.addAll(bl);
+        Paxos consensus = new Paxos(this, null, 0, 0,  (pNum / 2) + 1, paxsosNum);
+        PaxosDecision decision = consensus.propose(b);
         consensus.stopPaxos();
+        while (decision.v == null) {
+            log.info(format("[%d] null valued returned from consensus initiate consensus [%d < %d] "
+                    , getId(), decision.paxosNum, paxsosNum));
+            PaxosDecision late_decision = decided.get(decision.paxosNum);
+            Paxos late = new Paxos(this, late_decision.v, late_decision.lastGoodRound,
+                    late_decision.lastRound, (pNum / 2) + 1, late_decision.paxosNum);
+            late.propose(null); // TODO: can we delete the decision after completing it?
+            late.stopPaxos();
+            consensus = new Paxos(this, null, 0, 0,  (pNum / 2) + 1, paxsosNum);
+            decision = consensus.propose(b);
+            consensus.stopPaxos();
+        }
+        decided.add(decision);
+        blockchain.addAll(decision.v);
         paxsosNum++;
     }
     public boolean validateBlock(Block b, List<Block> bl) {
@@ -93,10 +110,11 @@ public class BlockChainServer {
     }
 
     public Block propose(Block b) {
-        Paxos consensus = new Paxos(this, (pNum / 2) + 1, getBCLength());
-        Block res = consensus.propose(b).get(0);
-        consensus.stopPaxos();
-        return res;
+//        Paxos consensus = new Paxos(this, (pNum / 2) + 1, getBCLength());
+//        Block res = consensus.propose(b).get(0);
+//        consensus.stopPaxos();
+//        return res;
+        return null;
     }
 
     public void sleep(int seconds) {

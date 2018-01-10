@@ -1,4 +1,4 @@
-﻿for ($i = 0 ; $i -le 10 ; $i++) {
+﻿for ($i = 0 ; $i -le 9 ; $i++) {
     $serversClusterFolder = "..\BCServersCluster"
     $servers = ls ..\BCServersCluster
     cd $serversClusterFolder

@@ -1,6 +1,7 @@
 Utils\P2PSocket$1.class
 App\ServerCLI.class
 Utils\MembershipDetectore.class
+Paxos\PaxosMsgs\PaxosDecision.class
 DataTypes\Block.class
 Utils\ZooKeeperClient.class
 Paxos\PaxosMsgs\AcceptMsg.class
