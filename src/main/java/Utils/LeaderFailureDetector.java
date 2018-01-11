@@ -61,6 +61,8 @@ public class LeaderFailureDetector {
         return electedLeader;
     }
 
+    static public int getCurrentLeaderId() { return Integer.parseInt(electedLeader.split(":")[1]); }
+
     static public void close() throws InterruptedException {
         zoo.close();
     }

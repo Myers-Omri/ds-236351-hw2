@@ -46,31 +46,31 @@ public class Messenger {
                 PrepareMsg aMsg = (PrepareMsg)deserialize(msg, PrepareMsg.class);
                 if (aMsg.round > pNum) continue;
                 remove.add(msg);
-                if (aMsg.round == pNum) {
-                    log.info(format("received PREPARE massage on round [%d]", pNum));
+                //if (aMsg.round == pNum) {
+                    log.info(format("received PREPARE massage on round [%d] from round [%d]", pNum, aMsg.round));
                     ret = aMsg;
                     break;
-                }
+               // }
             }
             if (msg.contains(ACCEPT)) {
                 AcceptMsg aMsg = (AcceptMsg)deserialize(msg, AcceptMsg.class);
                 if (aMsg.round > pNum) continue;
                 remove.add(msg);
-                if (aMsg.round == pNum) {
-                    log.info(format("received ACCEPT massage on round [%d]", pNum));
+              //  if (aMsg.round == pNum) {
+                    log.info(format("received ACCEPT massage on round [%d] from round [%d]", pNum, aMsg.round));
                     ret = aMsg;
                     break;
-                }
+              //  }
             }
             if (msg.contains(COMMIT)) {
                 CommitMsg aMsg = (CommitMsg)deserialize(msg, CommitMsg.class);
                 if (aMsg.round > pNum) continue;
                 remove.add(msg);
-                if (aMsg.round == pNum) {
-                    log.info(format("received COMMIT massage on round [%d]", pNum));
+                //if (aMsg.round == pNum) {
+                    log.info(format("received COMMIT massage on round [%d] from round [%d]", pNum, aMsg.round));
                     ret = aMsg;
                     break;
-                }
+                //}
             }
         }
         aInBuf.removeAll(remove);
@@ -90,7 +90,7 @@ public class Messenger {
                 if (aMsg.round > pNum) continue;
                 remove.add(msg);
                 if (aMsg.round == pNum) {
-                    log.info(format("received PROMISE massage on round [%d]", pNum));
+                    log.info(format("received PROMISE massage on round [%d] from round [%d]", pNum, aMsg.round));
                     ret = aMsg;
                     break;
                 }
@@ -100,7 +100,7 @@ public class Messenger {
                 if (aMsg.round > pNum) continue;
                 remove.add(msg);
                 if (aMsg.round == pNum) {
-                    log.info(format("received ACCEPTED massage on round [%d]", pNum));
+                    log.info(format("received ACCEPTED massage on round [%d] from round [%d]", pNum, aMsg.round));
                     ret = aMsg;
                     break;
                 }
