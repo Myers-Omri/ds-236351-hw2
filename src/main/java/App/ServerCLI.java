@@ -113,7 +113,6 @@ public class ServerCLI {
                 b.addTransaction(new Transaction());
             }
         }
-        
 //        b.addTransaction(new Transaction());
 //        b.addTransaction(new Transaction());
         app.s.addBlock(b);

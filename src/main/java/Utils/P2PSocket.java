@@ -10,58 +10,52 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.String.format;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 public class P2PSocket {
     private static Logger log = Logger.getLogger(P2PSocket.class.getName());
-    private int port;
+    private int[] ports = new int[5];
     private List<String> msgs = new ArrayList<>();
-    private ServerSocket socket;
-//    private Socket concc;
-//    private final Object sync = new Object();
+    private ServerSocket[] sockets = new ServerSocket[5];
     private boolean alive = true;
-    private Thread listener;
-     public P2PSocket(int _port) throws IOException {
-         port = _port;
-         socket = new ServerSocket(port);
+//    private Thread listener;
+    private ExecutorService tp = newFixedThreadPool(5);
+     public P2PSocket(int[] _ports) throws IOException {
+         for (int i = 0 ; i < 5 ; i++) {
+             int port = _ports[i];
+             sockets[i] = new ServerSocket(port, 200);
+             sockets[i].setReuseAddress(true);
+         }
+
      }
-//    private final Semaphore sem = new Semaphore(0, true);
-//    private Lock global = new ReentrantLock();
     private final Lock lock = new ReentrantLock();
     final Condition notEmpty = lock.newCondition();
 
+    void handle(int i) {
+        while (alive) {
+            try {
+                Socket concc = sockets[i].accept();
+                BufferedReader in = new BufferedReader(new InputStreamReader(concc.getInputStream()));
+                readAll(in);
+                concc.close();
+            } catch (IOException e) {
+                log.info("[Exception] in socket [i] ",e);
+            }
+        }
+    }
     public void start() {
-         listener = new Thread() {
-             @Override
-             public void run() {
-//                 log.info(String.format("P2P socket started on [%s]", new String(socket.getInetAddress().getAddress())));
-                    while (alive) {
-                        try {
-                            Socket concc = socket.accept();
-                            new Thread() {
-                                @Override
-                                public void run() {
-                                    try {
-                                    BufferedReader in = new BufferedReader(new InputStreamReader(concc.getInputStream()));
-                                    readAll(in);
-                                    concc.close();
-                                    } catch (IOException e) {
-                                        log.info("[Exception] ",e);
-                                    }
-                                }
-                            }.start();
-                        }catch (IOException e) {
-                            log.info("[Exception] ",e);
-                        }
-                    }
-             }
-         };
-         listener.start();
+        tp.execute(()->handle(0));
+        tp.execute(()->handle(1));
+        tp.execute(()->handle(2));
+        tp.execute(()->handle(3));
+        tp.execute(()->handle(4));
      }
 
     public List<String> getMsgs() {
@@ -84,12 +78,14 @@ public class P2PSocket {
     public void close() {
         alive = false;
         try {
-            socket.close();
+            for (int i = 0 ; i < 5 ; i++) {
+                sockets[i].close();
+            }
         } catch (IOException e) {
             log.info("[Exception] ",e);
         }
 
-        listener.interrupt();
+        tp.shutdownNow();
     }
 
     private void readAll(BufferedReader b)  {
@@ -99,9 +95,7 @@ public class P2PSocket {
              while ((line = b.readLine()) != null) {
                  msgs.add(line);
              }
-//             synchronized (notEmpty) {
-                 notEmpty.signalAll();
-//             }
+             notEmpty.signalAll();
          } catch (Exception e) {
              log.info("[Exception] ",e);
          } finally {
@@ -116,8 +110,10 @@ public class P2PSocket {
     }
 
     public boolean isEmpty() {
-         boolean size = (msgs.size() == 0);
-         return size;
+        lock.lock();
+        boolean size = (msgs.size() == 0);
+        lock.unlock();
+        return size;
     }
 }
 

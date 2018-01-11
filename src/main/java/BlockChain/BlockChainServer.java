@@ -35,7 +35,7 @@ public class BlockChainServer {
     public BlockChainServer(final String name, final String address, final DataTypes.Block root,
                              int p_num) throws IOException {
         Random ran = new Random();
-        int x = ran.nextInt(2) + 4; //TODO: remove for production
+        int x = ran.nextInt(2) + 2; //TODO: remove for production
         log.info(format("[%d] Host will wait %d seconds before starting", Config.id, x));
         try {
             Thread.sleep(x * 1000);

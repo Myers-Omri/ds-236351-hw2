@@ -79,7 +79,7 @@ public class Paxos {
             v = msg.blocks;
             String strMsg = serialize(new CommitMsg(Config.id, msg.r, v, Config.addr, paxosNum));
             server.msn.broadcastToAcceptors(strMsg, msg.serverID);
-            log.info(format("[%d] decided [%s] round [%d]", Config.id, strMsg, paxosNum));
+            log.info(format("[%d] decided on round [%d]", Config.id, paxosNum));
             decided = true;
         }
     }
@@ -128,10 +128,13 @@ public class Paxos {
         while (!decided) {
             Object msg = server.msn.receiveAcceptorMsg(paxosNum);
             if (msg instanceof PrepareMsg) {
+                log.info(format("[%d] accepted prepare Msg on round [%d] from [%d]", Config.id, paxosNum, ((PrepareMsg) msg).serverID));
                 acceptorPreparePhase((PrepareMsg) msg);
             } else if (msg instanceof AcceptMsg) {
+                log.info(format("[%d] accepted prepare Msg on round [%d] from [%d]", Config.id, paxosNum, ((AcceptMsg) msg).serverID));
                 acceptorAcceptPhase((AcceptMsg) msg);
             } else if (msg instanceof CommitMsg) {
+                log.info(format("[%d] accepted prepare Msg on round [%d] from [%d]", Config.id, paxosNum, ((CommitMsg) msg).serverID));
                 acceptorCommitPhase((CommitMsg) msg);
             }
         }
