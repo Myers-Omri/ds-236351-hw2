@@ -15,6 +15,7 @@ public class Transaction {
     public TransactionType _type;
     public int _transactionId;
     public int _clientId; //external client- the one that uses ds-shipping service
+    public int _receiverId;
     public int _itemId;
     public int _officeId; //internal client- the one that update the BlockChain for parcel location.
 
@@ -33,13 +34,14 @@ public class Transaction {
     //for COLLECTED_BY_CUSTOMER:
     //public String _arrivedApproval;
 
-    public Transaction(int transaction_id, int item_id, int client_id, TransactionType type ){
+    public Transaction(int transaction_id, int item_id, int client_id, int receiver_id, TransactionType type){
 
         Random ran = new Random();
         forTest = ran.nextInt(100);
         _transactionId = transaction_id;
         _itemId = item_id;
         _clientId = client_id;
+        _receiverId = receiver_id; //TODO: WHAT???
         _type = type;
     }
 
@@ -55,7 +57,7 @@ public class Transaction {
 
     @Override
     public String toString() {
-        return Integer.toString(_transactionId);
+        return ("[ID=" + Integer.toString(_transactionId) + ", Item ID=" + Integer.toString(_itemId) + ", From ID=" + Integer.toString(_clientId) + ", To ID=" + Integer.toString(_receiverId) + "]");
     }
 
     //double data = random();

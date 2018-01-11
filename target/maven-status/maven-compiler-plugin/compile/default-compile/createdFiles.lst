@@ -1,4 +1,3 @@
-Utils\P2PSocket$1.class
 App\ServerCLI.class
 Utils\MembershipDetectore.class
 DataTypes\Block.class
@@ -9,6 +8,8 @@ Paxos\PaxosWatcher.class
 BlockChain\BlockChainServer.class
 Paxos\PaxosMsgs\PromiseMsg.class
 Paxos\PaxosMsgs\PrepareMsg.class
+hello\Application.class
+Hello.class
 Paxos\Paxos.class
 Paxos\PaxosMsgs\CommitMsg.class
 DataTypes\Transaction.class
@@ -17,8 +18,10 @@ Paxos\PaxosMsgs\PaxosMsg.class
 Paxos\Peer.class
 Utils\P2PSocket.class
 Utils\SystemUtils.class
+Utils\Messenger.class
 Utils\JsonSerializer.class
 Paxos\PaxosMsgs\AcceptedMsg.class
 Paxos\PaxosMsgs\PaxosMassegesTypes.class
+hello\GreetingController.class
 Utils\Config.class
-Utils\P2PSocket$1$1.class
+hello\Greeting.class

@@ -1,6 +1,7 @@
 package BlockChain;
 
 import DataTypes.Block;
+import DataTypes.Transaction;
 import Paxos.Paxos;
 import Paxos.PaxosMsgs.PaxosMassegesTypes;
 import Utils.*;
@@ -22,6 +23,11 @@ public class BlockChainServer {
     private int pNum;
     private List<DataTypes.Block> blockchain = new ArrayList<>();
     public Messenger msn;
+    private int id;
+    Paxos consensus = null;
+
+    private Block currentBlock;
+
     public Map<String, P2PSocket> p2pSockets = new HashMap<>();
     private static Logger log = Logger.getLogger(BlockChainServer.class.getName());
 
@@ -29,7 +35,7 @@ public class BlockChainServer {
     public BlockChainServer(final String name, final String address, final DataTypes.Block root,
                              int p_num) throws IOException {
         Random ran = new Random();
-        int x = ran.nextInt(2) + 4; //TODO: remove for production
+        int x = ran.nextInt(2) + 2; //TODO: remove for production
         log.info(format("[%d] Host will wait %d seconds before starting", Config.id, x));
         try {
             Thread.sleep(x * 1000);
@@ -52,6 +58,8 @@ public class BlockChainServer {
         } catch (InterruptedException e) {
             log.info("[Exception] ", e);
         }
+
+        currentBlock = new Block(1); //TODO - this is merely a placeholder, need to address block-generation-cycles
     }
     public int getId() {return Config.id;}
     public String getName() {
@@ -106,5 +114,10 @@ public class BlockChainServer {
         } catch (InterruptedException e) {
             log.info("[Exception] ", e);
         }
+    }
+
+    public void processTransaction(Transaction tx) {
+        log.info(format("Transaction received by server: %s", tx.toString()));
+        currentBlock.addTransaction(tx);
     }
 }

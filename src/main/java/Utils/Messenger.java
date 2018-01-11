@@ -110,19 +110,36 @@ public class Messenger {
         return ret;
     }
     public void sendMassageToLeader(String msg, int leaderID) {
-        sendMsg(msg, peers.get(leaderID).addr, peers.get(leaderID).lPort);
+        sendMsg(msg, peers.get(leaderID).addr, peers.get(leaderID).lPort, leaderID);
     }
-
-    private void sendMsg(String msg, String host, int port) {
-        try {
-            Socket peer = new Socket(host, port);
-            DataOutputStream out = new DataOutputStream (peer.getOutputStream());
-            out.writeBytes(msg);
-            peer.close();
-        } catch (Exception e) {
-            log.info("[Exception] ",e);
+    private boolean isAlive(int sId) {
+        for (String s : MembershipDetectore.getMembers()) {
+            if (((Peer) JsonSerializer.deserialize(s, Peer.class)).id == sId) {
+                return true;
+            }
         }
-        log.info(format("send a massage [%s] to [%s:%d]",msg, host, port));
+        log.info(format("server [%d] is down, send aborted", sId));
+        return false;
+
+    }
+    private void sendMsg(String msg, String host, int[] port, int sId) {
+        int moved = 0;
+        boolean succ = false;
+        while (isAlive(sId) && !succ && moved < 5) { //TODO: BUG ALERTS
+            try {
+                Socket peer = new Socket(host, port[moved]);
+                DataOutputStream out = new DataOutputStream (peer.getOutputStream());
+                out.writeBytes(msg);
+                peer.close();
+                succ = true;
+                log.info(format("send a massage [%s] to [%s:%d]",
+                        msg.split("type")[1].split(":")[1].split(",")[0].replaceAll("\"", " "), host, port[moved]));
+            } catch (Exception e) {
+                log.info(format("[Exception[%s:%d]]", host, port[moved]),e);
+                moved++;
+            }
+        }
+
     }
 
     public void broadcastToAcceptors(String msg, int excludeID) {
@@ -132,7 +149,7 @@ public class Messenger {
         }
         for (Peer p : members) {
             if (p.id != excludeID) {
-                sendMsg(msg, p.addr, p.aPort);
+                sendMsg(msg, p.addr, p.aPort, p.id);
             }
         }
     }
