@@ -33,16 +33,15 @@ public class Transaction {
 
     //for COLLECTED_BY_CUSTOMER:
     //public String _arrivedApproval;
-//    public Transaction() {
-//        Random ran = new Random();
-//        forTest = ran.nextInt(100);
-//    }
 
-    public Transaction(int transaction_id, int item_id, int client_id, int receiver_id, TransactionType type ){
+    public Transaction(int transaction_id, int item_id, int client_id, int receiver_id, TransactionType type){
+
+        Random ran = new Random();
+        forTest = ran.nextInt(100);
         _transactionId = transaction_id;
         _itemId = item_id;
         _clientId = client_id;
-        _receiverId = receiver_id;
+        _receiverId = receiver_id; //TODO: WHAT???
         _type = type;
     }
 
