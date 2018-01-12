@@ -10,7 +10,7 @@ import static java.lang.String.format;
 public class Block {
     public long prevBlockHash;
     public  List<Transaction> transactions;
-
+    private int MAX_BLOCK_SIZE = 3;
     private static Logger log = Logger.getLogger(Block.class.getName());
 
     public Block(long hash) {
@@ -23,6 +23,10 @@ public class Block {
         transactions.add(t);
     }
 
+
+    public boolean isFull(){
+        return transactions.size() == MAX_BLOCK_SIZE;
+    }
 //    //private boolean validate() {
 //        return true;
 //    }

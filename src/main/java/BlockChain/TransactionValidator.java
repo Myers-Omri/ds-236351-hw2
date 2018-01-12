@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.lang.String.format;
 
@@ -30,6 +31,12 @@ public class TransactionValidator {
 
     public boolean Validate(Transaction currentTransaction){
         this.currentTransaction = currentTransaction;
+        for (Transaction t : currentBlock.transactions){
+            if (!(validateIds(t) && validateFromTo(t))){
+                return false;
+            }
+        }
+
         for (Block b : blockchain){
             for (Transaction t : b.transactions){
                 if (!(validateIds(t) && validateFromTo(t))){
@@ -42,9 +49,9 @@ public class TransactionValidator {
 
     private boolean validateFromTo(Transaction t) {
         boolean res = true;
-        if (t.serviceId.equals(currentTransaction.serviceId)){
-            res = (t.getFrom().equals(currentTransaction.getFrom())) &&
-                    (t.getTo().equals(currentTransaction.getTo()));
+        if (Objects.equals(t.serviceId, currentTransaction.serviceId)){
+            res = (Objects.equals(t.getFrom(), currentTransaction.getFrom())) &&
+                    (Objects.equals(t.getTo(), currentTransaction.getTo()));
         }
         if (! res){
             log.info(format("(validateFromTo) Invalid transaction ", t.toString()));
@@ -60,8 +67,8 @@ public class TransactionValidator {
                     (t.getItemId() == currentTransaction.getItemId());
         }
 
-        if (t.serviceId.equals(currentTransaction.serviceId)){
-            res = (t.getClientId() == currentTransaction.getClientId()) &&
+        if (Objects.equals(t.serviceId, currentTransaction.serviceId)){
+            res = res &&  (t.getClientId() == currentTransaction.getClientId()) &&
                     (t.getItemId() == currentTransaction.getItemId() );
         }
         if (! res){

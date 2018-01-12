@@ -126,8 +126,8 @@ public class BlockChainServer {
             return;
         }
         currentBlock.addTransaction(tx);
-//        if (currentBlock.isFull()){
-//
-//        }
+        if (currentBlock.isFull()){
+            addBlock(currentBlock);
+        }
     }
 }

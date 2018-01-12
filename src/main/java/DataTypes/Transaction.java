@@ -104,6 +104,7 @@ public class Transaction {
 
     public void setTransactionId(int transactionId) {
         this.transactionId = transactionId;
+        this.serviceId = Integer.toString(clientId ) + "_" + Integer.toString(transactionId);
     }
 
     public void setItemId(int itemId) {
