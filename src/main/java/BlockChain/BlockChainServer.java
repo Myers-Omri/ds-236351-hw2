@@ -4,16 +4,12 @@ import DataTypes.Block;
 import DataTypes.Transaction;
 import Paxos.Paxos;
 import Paxos.PaxosMsgs.PaxosDecision;
-import Paxos.PaxosMsgs.PaxosMassegesTypes;
-import Utils.*;
-import Paxos.Peer;
+import Utiles.*;
+import Utiles.Peer;
 import org.apache.log4j.Logger;
 
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.*;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static java.lang.String.format;
 
@@ -50,7 +46,7 @@ public class BlockChainServer {
         this.address = address;
         this.pNum = p_num;
         Peer peers = new Peer(Config.id, address, Config.lPort, Config.aPort);
-        MembershipDetectore.start(JsonSerializer.serialize(peers), Integer.toString(Config.id));
+        MembershipDetector.start(JsonSerializer.serialize(peers), Integer.toString(Config.id));
         log.info(format("[%d] Host started Membership detector", getId()));
         blockchain.add(root);
         msn = new Messenger(new P2PSocket(Config.aPort), new P2PSocket(Config.lPort));
@@ -102,7 +98,7 @@ public class BlockChainServer {
     }
     public void stopHost() {
         try {
-            MembershipDetectore.close();
+            MembershipDetector.close();
             LeaderFailureDetector.close();
             msn.close();
         } catch (InterruptedException e) {

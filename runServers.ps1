@@ -2,12 +2,12 @@
 $servers = ls ..\BCServersCluster
 cd $serversClusterFolder
 $path = (Get-Item -Path .\).FullName
-for ($i = 0 ; $i -le 30 ; $i++) {
+for ($i = 0 ; $i -le 0 ; $i++) {
     $servers | % {
         rm $path\$_\outputs\out_$i.txt
     }
 }
-for ($i = 0 ; $i -le 100 ; $i++) {
+for ($i = 0 ; $i -le 0 ; $i++) {
     $procs = @()
     $servers | % { 
        cd $path\$_

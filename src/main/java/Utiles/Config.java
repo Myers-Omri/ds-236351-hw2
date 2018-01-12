@@ -1,6 +1,4 @@
-package Utils;
-
-import org.apache.log4j.Logger;
+package Utiles;
 
 import java.io.File;
 import java.io.FileReader;

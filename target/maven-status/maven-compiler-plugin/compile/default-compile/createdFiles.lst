@@ -11,8 +11,12 @@ SystemUtils\ServerThreadBase.class
 Paxos\PaxosMsgs\PromiseMsg.class
 Paxos\PaxosMsgs\PrepareMsg.class
 SystemUtils\ServerClientBase.class
+BlockChain\ClientComServer.class
+hello\Application.class
+Hello.class
 Paxos\Paxos.class
 SystemUtils\MessageBase.class
+hello\DSController.class
 Paxos\PaxosMsgs\CommitMsg.class
 DataTypes\Transaction.class
 Utils\LeaderFailureDetector.class
@@ -26,6 +30,4 @@ Utils\JsonSerializer.class
 Paxos\PaxosMsgs\AcceptedMsg.class
 DataTypes\Address.class
 Paxos\PaxosMsgs\PaxosMassegesTypes.class
-hello\GreetingController.class
 Utils\Config.class
-hello\Greeting.class

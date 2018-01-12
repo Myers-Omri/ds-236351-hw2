@@ -1,4 +1,4 @@
-package Paxos;
+package Utiles;
 
 import Paxos.PaxosMsgs.PaxosMassegesTypes;
 

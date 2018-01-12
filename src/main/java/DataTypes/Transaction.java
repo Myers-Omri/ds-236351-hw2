@@ -1,8 +1,6 @@
 package DataTypes;
 
 
-import java.util.Random;
-
 public class Transaction {
     public enum TransactionType {
         INIT_SHIPMENT,
@@ -11,56 +9,132 @@ public class Transaction {
         COLLECTED_BY_CUSTOMER,
         DEFAULT
     }
-    public int forTest;
-    public TransactionType _type;
-    public int _transactionId;
-    public int _clientId; //external client- the one that uses ds-shipping service
-    public int _receiverId;
-    public int _itemId;
-    public int _officeId; //internal client- the one that update the BlockChain for parcel location.
+    private int forTest;
+    private TransactionType _type = TransactionType.DEFAULT;
+    private int transactionId;
+    private int clientId; //external client- the one that uses ds-shipping service
+    private int receiverId;
+    private int itemId;
+    public int officeId; //internal client- the one that update the BlockChain for parcel location.
 
 
      // type dependent fields:
     // for INIT_SHIPMENT:
-    public Address _from;
-    public Address _to;
-    public String _description;
+    public String from;
+    public String to;
+    public String description;
     //public String _shipApproval;
 
     // for LOCATION_UPDATE
-    public Address _currentLocation;
-    public Address _nextHop;
+    public String currentLocation;
+    public String nextHop;
 
     //for COLLECTED_BY_CUSTOMER:
     //public String _arrivedApproval;
 
-    public Transaction(int transaction_id, int item_id, int client_id, int receiver_id, TransactionType type){
-
-        Random ran = new Random();
-        forTest = ran.nextInt(100);
-        _transactionId = transaction_id;
-        _itemId = item_id;
-        _clientId = client_id;
-        _receiverId = receiver_id; //TODO: WHAT???
-        _type = type;
-    }
-
-    public Transaction(int transaction_id){
-        _transactionId = transaction_id;
-    }
-    public Transaction(){
-        _transactionId = 0;
-        _itemId = 0;
-        _clientId = 0;
-        _type = TransactionType.DEFAULT;
-    }
+//    public Transaction(int transaction_id, int item_id, int client_id, int receiver_id, TransactionType type){
+//
+//        Random ran = new Random();
+//        forTest = ran.nextInt(100);
+//        transactionId = transaction_id;
+//        itemId = item_id;
+//        clientId = client_id;
+//        receiverId = receiver_id; //TODO: WHAT???
+//        _type = type;
+//    }
+//
+//    public Transaction(int transaction_id){
+//        transactionId = transaction_id;
+//    }
+//    public Transaction(){
+//        transactionId = 0;
+//        itemId = 0;
+//        clientId = 0;
+//        _type = TransactionType.DEFAULT;
+//    }
 
     @Override
     public String toString() {
-        return ("[ID=" + Integer.toString(_transactionId) + ", Item ID=" + Integer.toString(_itemId) + ", From ID=" + Integer.toString(_clientId) + ", To ID=" + Integer.toString(_receiverId) + "]");
+        return ("[ID=" + Integer.toString(transactionId) + ", Item ID=" + Integer.toString(itemId) + ", From ID=" + Integer.toString(clientId) + ", To ID=" + Integer.toString(receiverId) + "]");
     }
 
-    //double data = random();
+    // all getters:
+    public int getClientId() {
+        return clientId;
+    }
+
+    public int getTransactionId() {
+        return transactionId;
+    }
+
+    public int getItemId() {
+        return itemId;
+    }
+
+    public int getOfficeId() {
+        return officeId;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getCurrentLocation() {
+        return currentLocation;
+    }
+
+    public String getNextHop() {
+        return nextHop;
+    }
+
+    // =================================================================
+
+    // all setters:
+    public void setClientId(int clientId) {
+        this.clientId = clientId;
+    }
+
+    public void setTransactionId(int transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public void setItemId(int itemId) {
+        this.itemId = itemId;
+    }
+
+    public void setOfficeId(int officeId) {
+        this.officeId = officeId;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
+    }
+
+    public void setTo(String to) {
+        this.to = to;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setCurrentLocation(String currentLocation) {
+        this.currentLocation = currentLocation;
+    }
+
+    public void setNextHop(String nextHop) {
+        this.nextHop = nextHop;
+    }
+
+    // =================================================================
 
 
 }

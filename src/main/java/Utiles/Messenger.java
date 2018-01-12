@@ -1,6 +1,5 @@
-package Utils;
+package Utiles;
 import Paxos.PaxosMsgs.*;
-import Paxos.Peer;
 import org.apache.log4j.Logger;
 
 import java.io.DataOutputStream;
@@ -9,7 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import static Paxos.PaxosMsgs.PaxosMassegesTypes.*;
-import static Utils.JsonSerializer.deserialize;
+import static Utiles.JsonSerializer.deserialize;
 import static java.lang.String.format;
 
 
@@ -27,7 +26,7 @@ public class Messenger {
         this.lIn = lIn;
         this.lIn.start();
         this.aIn.start();
-        for (String s : MembershipDetectore.getMembers()) {
+        for (String s : MembershipDetector.getMembers()) {
          Peer newPeer = (Peer) JsonSerializer.deserialize(s, Peer.class);
          peers.put(newPeer.id, newPeer);
         }
@@ -113,7 +112,7 @@ public class Messenger {
         sendMsg(msg, peers.get(leaderID).addr, peers.get(leaderID).lPort, leaderID);
     }
     private boolean isAlive(int sId) {
-        for (String s : MembershipDetectore.getMembers()) {
+        for (String s : MembershipDetector.getMembers()) {
             if (((Peer) JsonSerializer.deserialize(s, Peer.class)).id == sId) {
                 return true;
             }
@@ -144,7 +143,7 @@ public class Messenger {
 
     public void broadcastToAcceptors(String msg, int excludeID) {
         List<Peer> members = new ArrayList<>();
-        for (String s : MembershipDetectore.getMembers()) {
+        for (String s : MembershipDetector.getMembers()) {
             members.add((Peer) JsonSerializer.deserialize(s, Peer.class));
         }
         for (Peer p : members) {

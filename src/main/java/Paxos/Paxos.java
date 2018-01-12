@@ -3,21 +3,17 @@ package Paxos;
 import BlockChain.BlockChainServer;
 import DataTypes.Block;
 import Paxos.PaxosMsgs.*;
-import Utils.Config;
-import Utils.JsonSerializer;
-import Utils.LeaderFailureDetector;
+import Utiles.Config;
 import org.apache.log4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 
 import static Paxos.PaxosMsgs.PaxosMassegesTypes.*;
-import static Utils.JsonSerializer.deserialize;
-import static Utils.JsonSerializer.serialize;
-import static Utils.LeaderFailureDetector.getCurrentLeaderId;
+import static Utiles.JsonSerializer.serialize;
+import static Utiles.LeaderFailureDetector.getCurrentLeaderId;
 import static java.lang.StrictMath.max;
 import static java.lang.String.format;
 import static java.util.concurrent.Executors.newFixedThreadPool;

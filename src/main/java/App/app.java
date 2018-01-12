@@ -2,14 +2,12 @@ package App;
 
 import BlockChain.BlockChainServer;
 import DataTypes.Block;
-import Utils.Config;
-import Utils.SystemUtils;
+import Utiles.Config;
+import Utiles.SystemUtiles;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.List;
 
 
 public class app {
@@ -23,7 +21,7 @@ public class app {
     }
     public static void main(String args[]) throws IOException {
         Config.init();
-        SystemUtils.init();
+        SystemUtiles.init();
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String command;
         while ((command = br.readLine()) != null) {

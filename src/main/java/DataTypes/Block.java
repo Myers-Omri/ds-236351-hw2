@@ -1,6 +1,5 @@
 package DataTypes;
 
-import hello.GreetingController;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;

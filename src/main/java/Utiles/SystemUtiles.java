@@ -1,14 +1,12 @@
-package Utils;
+package Utiles;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
 /**
  * Created by yon_b on 1/2/2018.
  */
-public class SystemUtils {
+public class SystemUtiles {
     public static long getPID() {
         String processName =
                 java.lang.management.ManagementFactory.getRuntimeMXBean().getName();

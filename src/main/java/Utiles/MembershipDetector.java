@@ -1,20 +1,18 @@
-package Utils;
+package Utiles;
 
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MembershipDetectore {
+public class MembershipDetector {
     static private ZooKeeperClient zoo = null;
     static private String root = "/MEMBERS";
     static private List<String> members = new ArrayList<>();
-    private static Logger log = Logger.getLogger(MembershipDetectore.class.getName());
+    private static Logger log = Logger.getLogger(MembershipDetector.class.getName());
 
     static public void start(String data, String name) {
         try {

@@ -1,6 +1,6 @@
 package Paxos;
 
-import Utils.LeaderFailureDetector;
+import Utiles.LeaderFailureDetector;
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
