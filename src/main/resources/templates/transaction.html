@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <link href='http://fonts.googleapis.com/css?family=Bitter' rel='stylesheet' type='text/css'/>
+    <link rel="stylesheet" href="style.css" type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>KOMPAXON</title>
+</head>
+<body>
+
+<div class="form-style-10">
+    <h1>Create Transaction!<span>Enter your Transaction details and it will in the blockchain in a jiffy</span></h1>
+    <form action="#" th:action="@{/transaction}" th:object="${transaction}" method="post">
+        <table width="95%" align="center">
+            <tr>
+                <th valign="top">
+                    <div class="section">Client Details</div>
+                    <div class="inner-wrap">
+                        <label>Full Name <input type="text"  /></label>
+                        <label>Email <input  type="text" /></label>
+                        <label>Phone <input  type="text" /></label>
+                        <label>Client ID <input  type="text"  th:field="*{clientId}"/></label>
+                    </div>
+                </th>
+                <th>
+                    <div class="section">Transaction Details</div>
+                    <div class="inner-wrap">
+                        <label>*Type            <input type="text" class="field-style field-split align-left"  /></label>
+                        <label>*Transaction ID  <input type="text"  class="field-style field-split align-left"  th:field="*{transactionId}" /></label>
+                        <label>*Item ID         <input type="text"  class="field-style field-split align-left"  th:field="*{itemId}" /></label>
+                        <label>Office ID        <input type="text"  class="field-style field-split align-left"  th:field="*{officeId}"/></label>
+                        <label>From             <input type="text"  class="field-style field-split align-left"  th:field="*{from}"/></label>
+                        <label>To               <input type="text"  class="field-style field-split align-left"  th:field="*{to}" /></label>
+                        <label>Description      <input type="text"  class="field-style field-split align-left"  th:field="*{description}"/></label>
+                        <label>CurrentLocation  <input type="text"  class="field-style field-split align-left"  th:field="*{currentLocation}"/></label>
+                        <label>NextHop          <input type="text"  class="field-style field-split align-left"  th:field="*{nextHop}"/></label>
+
+                    </div>
+                </th>
+            </tr>
+
+        </table>
+        <div class="button-section" align="center">
+            <input type="submit" value="Submit" />
+        </div>
+    </form>
+</div>
+
+
+</body>
+</html>

@@ -14,13 +14,14 @@ public class Application {
     public static BlockChainServer server;
 
     public static void main(String[] args) {
-//        Config.init();
-//        SystemUtils.init();
-//        try {
-//               server = new BlockChainServer(Config.s_name, Config.addr, new Block(0), Config.id, Config.p_num);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        Config.init();
+        SystemUtils.init();
+        try {
+               server = new BlockChainServer(Config.s_name, Config.addr, new Block(0), Config.p_num);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         SpringApplication.run(Application.class, args);
     }
 }
