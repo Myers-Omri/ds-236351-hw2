@@ -7,9 +7,12 @@ Paxos\PaxosMsgs\AcceptMsg.class
 App\app.class
 Paxos\PaxosWatcher.class
 BlockChain\BlockChainServer.class
+SystemUtils\ServerThreadBase.class
 Paxos\PaxosMsgs\PromiseMsg.class
 Paxos\PaxosMsgs\PrepareMsg.class
+SystemUtils\ServerClientBase.class
 Paxos\Paxos.class
+SystemUtils\MessageBase.class
 Paxos\PaxosMsgs\CommitMsg.class
 DataTypes\Transaction.class
 Utils\LeaderFailureDetector.class
@@ -17,7 +20,10 @@ Paxos\PaxosMsgs\PaxosMsg.class
 Paxos\Peer.class
 Utils\P2PSocket.class
 Utils\SystemUtils.class
+DataTypes\Transaction$TransactionType.class
+Utils\Messenger.class
 Utils\JsonSerializer.class
 Paxos\PaxosMsgs\AcceptedMsg.class
+DataTypes\Address.class
 Paxos\PaxosMsgs\PaxosMassegesTypes.class
 Utils\Config.class

@@ -33,7 +33,7 @@ public class BlockChainServer {
     public BlockChainServer(final String name, final String address, final DataTypes.Block root,
                              int p_num) throws IOException {
         Random ran = new Random();
-        int x = ran.nextInt(2) + 2; //TODO: remove for production
+        int x = ran.nextInt(5) + 2; //TODO: remove for production
         log.info(format("[%d] Host will wait %d seconds before starting", Config.id, x));
         try {
             Thread.sleep(x * 1000);
@@ -48,7 +48,7 @@ public class BlockChainServer {
         log.info(format("[%d] Host started Membership detector", getId()));
         blockchain.add(root);
         msn = new Messenger(new P2PSocket(Config.aPort), new P2PSocket(Config.lPort));
-        LeaderFailureDetector.start(format("%s:%d", getAddress(), getId()));
+        LeaderFailureDetector.start(format("%d", getId()));
         log.info(format("[%d] Host started Leader Failure detector", getId()));
         try {
             Thread.sleep(5 * 1000);
