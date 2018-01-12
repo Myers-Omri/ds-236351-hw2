@@ -16,7 +16,7 @@ public class Transaction {
     private int receiverId;
     private int itemId;
     public int officeId; //internal client- the one that update the BlockChain for parcel location.
-
+    public String serviceId;
 
      // type dependent fields:
     // for INIT_SHIPMENT:

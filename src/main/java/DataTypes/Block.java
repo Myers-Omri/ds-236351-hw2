@@ -23,7 +23,7 @@ public class Block {
         transactions.add(t);
     }
 
-    private boolean validate() {
-        return true;
-    }
+//    //private boolean validate() {
+//        return true;
+//    }
 }
