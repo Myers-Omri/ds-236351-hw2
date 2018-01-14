@@ -15,6 +15,7 @@ public class TransactionValidator {
     private Block currentBlock;
     private Transaction currentTransaction;
     private static Logger log = Logger.getLogger(Block.class.getName());
+
     public TransactionValidator(List<Block> blockchainRef){
         blockchain = blockchainRef;
         currentBlock = null;
@@ -77,5 +78,27 @@ public class TransactionValidator {
         return res; //the transaction id is diffrent so no problem
     }
 
+    public boolean validatePaxosChain(List<Block> tempchain, Block currentBlock) {
+        for (Transaction currentTransaction : currentBlock.transactions) {
+            for (Block b : tempchain) {
+                for (Transaction t: b.transactions) {
+                    if (!(validateIds(t) && validateFromTo(t))){
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
 
+    public boolean findTransactionByID(Transaction currentTransaction) {
+        for (Block b : blockchain) {
+            for (Transaction t : b.transactions) {
+                if (t.getTransactionId() == currentTransaction.getTransactionId()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
