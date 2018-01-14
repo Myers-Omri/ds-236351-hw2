@@ -93,6 +93,8 @@ public class BlockChainServer {
 //        }
         decided.add(decision);
         blockchain.addAll(decision.v);
+        log.info(format("severs blockadded #####: %d", decision.v.size()));
+
         paxsosNum++;
     }
     public boolean validateBlock(Block b, List<Block> bl) {
@@ -142,6 +144,23 @@ public class BlockChainServer {
         currentBlock.addTransaction(tx);
         if (currentBlock.isFull()){
             addBlock(currentBlock);
+            cleanCurrentBlock();
         }
+    }
+
+    private void cleanCurrentBlock() {
+        long lastHash = blockchain.get(blockchain.size() - 1).prevBlockHash;
+        currentBlock = new Block(lastHash+1);
+        for (Transaction t: currentBlock.transactions){
+            if (validator.findTransactionByID(t) == null){
+                currentBlock.addTransaction(t);
+            }
+        }
+
+        log.info(format("removing from current block: %s", currentBlock.transactions.size()));
+    }
+
+    public Transaction checkTransaction(Transaction t){
+        return (validator.findTransactionByID(t));
     }
 }

@@ -91,14 +91,15 @@ public class TransactionValidator {
         return true;
     }
 
-    public boolean findTransactionByID(Transaction currentTransaction) {
+    public Transaction findTransactionByID(Transaction currentTransaction) {
         for (Block b : blockchain) {
             for (Transaction t : b.transactions) {
                 if (t.getTransactionId() == currentTransaction.getTransactionId()) {
-                    return true;
+                    log.info(format("found equal id %d:", t.getTransactionId()));
+                    return t;
                 }
             }
         }
-        return false;
+        return null;
     }
 }

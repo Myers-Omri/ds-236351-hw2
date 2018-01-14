@@ -13,7 +13,7 @@ public class Block {
     private int MAX_BLOCK_SIZE = 3;
     private static Logger log = Logger.getLogger(Block.class.getName());
 
-    public Block(long hash) {
+    public  Block(long hash) {
         prevBlockHash = hash;
         transactions = new ArrayList<Transaction>();
     }
