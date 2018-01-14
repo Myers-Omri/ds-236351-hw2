@@ -24,6 +24,7 @@ public class BlockChainServer {
     public Messenger msn;
     private int id;
     Paxos consensus = null;
+    private TransactionValidator validator;
 
     private Block currentBlock;
 
@@ -60,6 +61,7 @@ public class BlockChainServer {
         }
 
         currentBlock = new Block(1); //TODO - this is merely a placeholder, need to address block-generation-cycles
+        validator = new TransactionValidator(this.blockchain);
     }
     public int getId() {return Config.id;}
     public String getName() {
@@ -132,6 +134,14 @@ public class BlockChainServer {
 
     public void processTransaction(Transaction tx) {
         log.info(format("Transaction received by server: %s", tx.toString()));
+        validator.setCurrentBlock(currentBlock);
+        if (! validator.Validate(tx)){
+            log.info(format("Transaction dropped by server: %s", tx.toString()));
+            return;
+        }
         currentBlock.addTransaction(tx);
+        if (currentBlock.isFull()){
+            addBlock(currentBlock);
+        }
     }
 }
