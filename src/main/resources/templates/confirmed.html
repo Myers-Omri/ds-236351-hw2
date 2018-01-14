@@ -1,10 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
+    <link href='http://fonts.googleapis.com/css?family=Bitter' rel='stylesheet' type='text/css'/>
+    <link rel="stylesheet" href="style.css" type='text/css' />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>KOMPAXON</title>
 </head>
 <body>
-$END$
+<div class="form-style-10">
+    <h1>Your transaction is Confirmed!</h1>
+    <p th:text="'clientId: ' + ${transaction.clientId}" />
+    <p th:text="'transactionId: ' + ${transaction.transactionId}" />
+    <p th:text="'itemId: ' + ${transaction.itemId}" />
+
+    <div class="button-section" align="center">
+        <a href="/index">
+            <input type="button" value="Home" />
+        </a>
+    </div>
+
+</div>
 </body>
 </html>
