@@ -2,7 +2,6 @@ package Application;
 
 import java.util.Random;
 
-import Application.Application;
 import DataTypes.Block;
 import DataTypes.Transaction;
 import Utiles.JsonSerializer;
@@ -92,7 +91,7 @@ public class ServerCLI {
         System.exit(0);
     }
     private void start() {
-//        app.init();
+//        Application.init();
     }
     private void kill() {
         Application.s.stopHost();
