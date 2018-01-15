@@ -79,18 +79,6 @@ public class BlockChainServer {
         Paxos consensus = new Paxos(this, null, 0, 0,  (pNum / 2) + 1, paxsosNum);
         PaxosDecision decision = consensus.propose(b);
         consensus.stopPaxos();
-//        while (decision.v == null) {
-//            log.info(format("[%d] null valued returned from consensus initiate consensus [%d < %d] "
-//                    , getId(), decision.paxosNum, paxsosNum));
-//            PaxosDecision late_decision = decided.get(decision.paxosNum);
-//            Paxos late = new Paxos(this, late_decision.v, late_decision.lastGoodRound,
-//                    late_decision.lastRound, (pNum / 2) + 1, late_decision.paxosNum);
-//            late.propose(null); // TODO: can we delete the decision after completing it?
-//            late.stopPaxos();
-//            consensus = new Paxos(this, null, 0, 0,  (pNum / 2) + 1, paxsosNum);
-//            decision = consensus.propose(b);
-//            consensus.stopPaxos();
-//        }
         decided.add(decision);
         blockchain.addAll(decision.v);
         log.info(format("severs blockadded #####: %d", decision.v.size()));
@@ -149,15 +137,16 @@ public class BlockChainServer {
     }
 
     private void cleanCurrentBlock() {
-        long lastHash = blockchain.get(blockchain.size() - 1).prevBlockHash;
-        currentBlock = new Block(lastHash+1);
+        //long lastHash = blockchain.get(blockchain.size() - 1).prevBlockHash;
+        Block tmpBlock = new Block(paxsosNum);
+
         for (Transaction t: currentBlock.transactions){
             if (validator.findTransactionByID(t) == null){
-                currentBlock.addTransaction(t);
+                tmpBlock .addTransaction(t);
             }
         }
-
-        log.info(format("removing from current block: %s", currentBlock.transactions.size()));
+        currentBlock=tmpBlock;
+        log.info(format("current block size after cleaning is: %s", currentBlock.transactions.size()));
     }
 
     public Transaction checkTransaction(Transaction t){
