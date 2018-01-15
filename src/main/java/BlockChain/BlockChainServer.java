@@ -152,4 +152,13 @@ public class BlockChainServer {
     public Transaction checkTransaction(Transaction t){
         return (validator.findTransactionByID(t));
     }
+
+    public Transaction checkPending (Transaction t){
+        for(Transaction tr: currentBlock.transactions){
+            if (t.getTransactionId() == tr.getTransactionId()){
+                return tr;
+            }
+        }
+        return null;
+    }
 }

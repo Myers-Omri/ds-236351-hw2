@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import static java.lang.String.format;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class DSController {
@@ -72,16 +73,27 @@ public class DSController {
    }
 
     @PostMapping("/check_transaction")
-    public String transactionCheckResult (@ModelAttribute Transaction transaction) {
+    public ModelAndView transactionCheckResult (@ModelAttribute Transaction transaction) {
+
+        Transaction t_pending = Application.s.checkPending(transaction);
+        if (t_pending != null){
+            ModelAndView mav = new ModelAndView("pending");
+            mav.addObject("transaction", t_pending);
+            return mav;
+        }
 
         Transaction t = Application.s.checkTransaction(transaction);
         if(t == null){
-            return transactionDenied(transaction);
+            ModelAndView mav = new ModelAndView("denied");
+            return mav;
+//            return transactionDenied(transaction);
         }
-        return transactionConfirmed(t);
+        ModelAndView mav = new ModelAndView("confirmed");
+        mav.addObject("transaction", t);
+        return mav;
+//        return transactionConfirmed(t);
 
     }
-
     @PostMapping("/confirmed")
     public String transactionConfirmed(@ModelAttribute Transaction transaction) {
         //Application.server.processTransaction(transaction);
