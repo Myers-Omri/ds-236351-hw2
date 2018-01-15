@@ -10,7 +10,7 @@ import static java.lang.String.format;
 public class Block {
     public long prevBlockHash;
     public  List<Transaction> transactions;
-    private int MAX_BLOCK_SIZE = 3;
+    private int MAX_BLOCK_SIZE = 2;
     private static Logger log = Logger.getLogger(Block.class.getName());
 
     public  Block(long hash) {
