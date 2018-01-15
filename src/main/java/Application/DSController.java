@@ -1,4 +1,4 @@
-package hello;
+package Application;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -44,6 +44,13 @@ public class DSController {
 //        return "result";
 //    }
 
+    @RequestMapping("/index")
+    public String index(){
+        return "index";
+    }
+
+
+
     @RequestMapping("/transaction")
     public String transactionForm(Model model) {
         model.addAttribute("transaction", new Transaction());
@@ -53,9 +60,41 @@ public class DSController {
 
     @PostMapping("/transaction")
     public String transactionSubmit(@ModelAttribute Transaction transaction) {
-        Application.server.processTransaction(transaction);
+        Application.s.processTransaction(transaction);
         return "tresult";
     }
+
+   //check_transaction
+   @RequestMapping("/check_transaction")
+   public String transactionCheck(Model model) {
+       model.addAttribute("transaction", new Transaction());
+       return "check_transaction";
+   }
+
+    @PostMapping("/check_transaction")
+    public String transactionCheckResult (@ModelAttribute Transaction transaction) {
+
+        Transaction t = Application.s.checkTransaction(transaction);
+        if(t == null){
+            return transactionDenied(transaction);
+        }
+        return transactionConfirmed(t);
+
+    }
+
+    @PostMapping("/confirmed")
+    public String transactionConfirmed(@ModelAttribute Transaction transaction) {
+        //Application.server.processTransaction(transaction);
+        return "confirmed";
+    }
+
+    @PostMapping("/denied")
+    public String transactionDenied(@ModelAttribute Transaction transaction) {
+        //Application.server.processTransaction(transaction);
+        return "denied";
+    }
+
+
 //    @RequestMapping("/transaction")
 //    public void generateTransaction(@RequestParam(value="from", defaultValue="1") Integer from,
 //                                    @RequestParam(value="to", defaultValue="1") Integer to,

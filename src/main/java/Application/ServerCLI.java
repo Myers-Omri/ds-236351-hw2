@@ -1,7 +1,8 @@
-package App;
+package Application;
 
 import java.util.Random;
 
+import Application.Application;
 import DataTypes.Block;
 import DataTypes.Transaction;
 import Utiles.JsonSerializer;
@@ -94,25 +95,25 @@ public class ServerCLI {
 //        app.init();
     }
     private void kill() {
-        app.s.stopHost();
+        Application.s.stopHost();
     }
     private String showBC() {
-        String res = (JsonSerializer.serialize(app.s.getBlockchain()));
+        String res = (JsonSerializer.serialize(Application.s.getBlockchain()));
         res = res.replaceAll("},", "}," + System.lineSeparator()).
                 replaceAll("],", "]," + System.lineSeparator());
         return res;
     }
     private String show(int num) {
-        return (JsonSerializer.serialize(app.s.getBlock(num)));
+        return (JsonSerializer.serialize(Application.s.getBlock(num)));
     }
     private void sleep() {
         Random ran = new Random();
         int x = ran.nextInt(3) + 3;
-        app.s.sleep(x);
+        Application.s.sleep(x);
     }
     private void propose(int hash) {
         Block b = new Block(hash);
-        System.out.println(JsonSerializer.serialize(app.s.propose(b)));
+        System.out.println(JsonSerializer.serialize(Application.s.propose(b)));
     }
     private void add() {
         Block b = new Block(0);
@@ -124,6 +125,6 @@ public class ServerCLI {
         }
 //        b.addTransaction(new Transaction());
 //        b.addTransaction(new Transaction());
-        app.s.addBlock(b);
+        Application.s.addBlock(b);
     }
 }

@@ -12,8 +12,8 @@ import javax.ws.rs.core.MediaType;
 
 // The browser requests per default the HTML MIME type.
 
-//Sets the path to base URL + /hello
-@Path("/hello")
+//Sets the path to base URL + /Application
+@Path("/Application")
 public class Hello {
 
     // This method is called if TEXT_PLAIN is request
@@ -27,7 +27,7 @@ public class Hello {
     @GET
     @Produces(MediaType.TEXT_XML)
     public String sayXMLHello() {
-        return "<?xml version=\"1.0\"?>" + "<hello> Hello Jersey" + "</hello>";
+        return "<?xml version=\"1.0\"?>" + "<Application> Hello Jersey" + "</Application>";
     }
 
     // This method is called if HTML is request

@@ -8,16 +8,17 @@
 </head>
 <body>
 <div class="form-style-10">
-<h1>Your transaction is being processed:</h1>
-<p th:text="'clientId: ' + ${transaction.clientId}" />
-<p th:text="'transactionId: ' + ${transaction.transactionId}" />
-<p th:text="'itemId: ' + ${transaction.itemId}" />
-
-
+    <h1>Welcome to DS-Shipping <span>The most efficient shipping company in the world</span></h1>
 
     <div class="button-section" align="center">
-        <a href="/index">
-            <input type="button" value="Home" />
+        <a href="/transaction">
+        <input type="button" value="Submit another message" />
+        </a>
+    </div>
+<p> </p>
+    <div class="button-section" align="center">
+        <a href="/check_transaction">
+            <input type="button" value="check transaction status" />
         </a>
     </div>
 
