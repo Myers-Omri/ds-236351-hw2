@@ -1,7 +1,8 @@
-package App;
+package Application;
 
 import java.util.Random;
 
+import Application.Application;
 import DataTypes.Block;
 import DataTypes.Transaction;
 import Utiles.JsonSerializer;
@@ -34,46 +35,53 @@ public class ServerCLI {
                 .build());
     }
 
-    public void parse() {
+    public String parse() {
         CommandLineParser parser = new DefaultParser();
         try {
             CommandLine line = parser.parse(options, args);
             String[] in = line.getArgs();
             if (in[0].equals("help")) {
                 help();
+                return null;
             }
             if (in[0].equals("start")) {
                 start();
-                System.out.println("Initialization of server has finished successfully");
+                return "Initialization of server has finished successfully";
+//                System.out.println("Initialization of server has finished successfully");
             }
             if (in[0].equals("kill")) {
                 kill();
-                System.out.println("killing the server has finished successfully");
+                return "killing the server has finished successfully";
+//                System.out.println("killing the server has finished successfully");
             }
             if (in[0].equals("exit")) {
                 exit();
+                return null;
             }
             if (in[0].equals("showBC")) {
-                showBC();
+                return showBC();
             }
             if (in[0].equals("sleep")) {
                 sleep();
+                return null;
             }
             if (in[0].split("-")[0].equals("show")) {
                 int num = Integer.parseInt(in[0].split("-")[1]);
-                show(num);
+                return show(num);
             }
-            if (in[0].split("-")[0].equals("propose")) {
-                int hash = Integer.parseInt(in[0].split("-")[1]);
-                propose(hash);
-            }
-            if (in[0].split("-")[0].equals("add")) {
-                int hash = Integer.parseInt(in[0].split("-")[1]);
-                add(hash);
+//            if (in[0].split("-")[0].equals("propose")) {
+//                int hash = Integer.parseInt(in[0].split("-")[1]);
+//                propose(hash);
+//            }
+            if (in[0].equals("add")) {
+//                int hash = Integer.parseInt(in[0].split("-")[1]);
+                 add();
+                 return null;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
 
     }
     private void help() {
@@ -84,28 +92,31 @@ public class ServerCLI {
         System.exit(0);
     }
     private void start() {
-        app.init();
+//        app.init();
     }
     private void kill() {
-        app.s.stopHost();
+        Application.s.stopHost();
     }
-    private void showBC() {
-        System.out.println(JsonSerializer.serialize(app.s.getBlockchain()));
+    private String showBC() {
+        String res = (JsonSerializer.serialize(Application.s.getBlockchain()));
+        res = res.replaceAll("},", "}," + System.lineSeparator()).
+                replaceAll("],", "]," + System.lineSeparator());
+        return res;
     }
-    private void show(int num) {
-        System.out.println(JsonSerializer.serialize(app.s.getBlock(num)));
+    private String show(int num) {
+        return (JsonSerializer.serialize(Application.s.getBlock(num)));
     }
     private void sleep() {
         Random ran = new Random();
         int x = ran.nextInt(3) + 3;
-        app.s.sleep(x);
+        Application.s.sleep(x);
     }
     private void propose(int hash) {
         Block b = new Block(hash);
-        System.out.println(JsonSerializer.serialize(app.s.propose(b)));
+        System.out.println(JsonSerializer.serialize(Application.s.propose(b)));
     }
-    private void add(int hash) {
-        Block b = new Block(hash);
+    private void add() {
+        Block b = new Block(0);
         Random ran = new Random();
         int tNum = ran.nextInt(10); {
             for (int i = 0 ; i < tNum ; i++) {
@@ -114,6 +125,6 @@ public class ServerCLI {
         }
 //        b.addTransaction(new Transaction());
 //        b.addTransaction(new Transaction());
-        app.s.addBlock(b);
+        Application.s.addBlock(b);
     }
 }

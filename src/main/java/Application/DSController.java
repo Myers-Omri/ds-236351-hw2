@@ -1,4 +1,4 @@
-package hello;
+package Application;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -60,7 +60,7 @@ public class DSController {
 
     @PostMapping("/transaction")
     public String transactionSubmit(@ModelAttribute Transaction transaction) {
-        Application.server.processTransaction(transaction);
+        Application.s.processTransaction(transaction);
         return "tresult";
     }
 
@@ -74,7 +74,7 @@ public class DSController {
     @PostMapping("/check_transaction")
     public String transactionCheckResult (@ModelAttribute Transaction transaction) {
 
-        Transaction t = Application.server.checkTransaction(transaction);
+        Transaction t = Application.s.checkTransaction(transaction);
         if(t == null){
             return transactionDenied(transaction);
         }
