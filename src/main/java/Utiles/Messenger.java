@@ -121,7 +121,7 @@ public class Messenger {
         return false;
 
     }
-    private void sendMsg(String msg, String host, int[] port, int sId) {
+    public void sendMsg(String msg, String host, int[] port, int sId) {
         int moved = 0;
         boolean succ = false;
         while (isAlive(sId) && !succ && moved < 5) { //TODO: BUG ALERTS
