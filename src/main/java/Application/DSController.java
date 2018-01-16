@@ -20,7 +20,7 @@ public class DSController {
 
     private static Logger log = Logger.getLogger(DSController.class.getName());
 
-    public static Integer txId=0;
+    //public static Integer txId=0;
 
     @RequestMapping("/index")
     public String index(){
@@ -37,6 +37,7 @@ public class DSController {
     @PostMapping("/transaction")
     public String transactionSubmit(@ModelAttribute Transaction transaction) {
         Application.s.processTransaction(transaction);
+        log.info("transaction processed");
         return "tresult";
     }
 

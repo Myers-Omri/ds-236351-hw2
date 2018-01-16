@@ -11,14 +11,12 @@ import java.util.List;
 public class MembershipDetector {
     static private ZooKeeperClient zoo = null;
     static private String root = "/MEMBERS";
-    static private List<String> members = new ArrayList<>();
     private static Logger log = Logger.getLogger(MembershipDetector.class.getName());
 
     static public void start(String data, String name) {
         try {
             connect();
             register(data, name);
-//            updateMembers();
         } catch (Exception e) {
             log.info("[Exception] ",e);
         }
@@ -37,6 +35,7 @@ public class MembershipDetector {
         zoo.createNode(root + "/" + name, msg.getBytes(), CreateMode.EPHEMERAL_SEQUENTIAL);
     }
 
+    //get all children of root.
     static public List<String> getMembers() {
         List<String> members = new ArrayList<>();
         try {

@@ -13,25 +13,24 @@ import java.util.*;
 
 import static java.lang.String.format;
 
+
+/*
+* This class implements a BlockChain Server
+ * maintain the blockChain and uses paxos the get consensus for the
+ * blocks to be added to the chain
+*/
 public class BlockChainServer {
     public int paxsosNum = 0;
     private String name;
     private String address;
     private int pNum;
     public boolean isLeader = false;
-    public int currentServerId = Config.id;
     private List<DataTypes.Block> blockchain = new ArrayList<>();
     public Messenger msn;
-    private int id;
-    Paxos consensus = null;
     private TransactionValidator validator;
-
     private Block currentBlock;
-
-    public Map<String, P2PSocket> p2pSockets = new HashMap<>();
     public List<PaxosDecision> decided = new ArrayList<>();
     private static Logger log = Logger.getLogger(BlockChainServer.class.getName());
-
 
     public BlockChainServer(final String name, final String address, final DataTypes.Block root,
                              int p_num) throws IOException {
@@ -64,6 +63,7 @@ public class BlockChainServer {
         validator = new TransactionValidator(this.blockchain);
     }
     public int getId() {return Config.id;}
+
     public String getName() {
         return name;
     }
@@ -75,19 +75,22 @@ public class BlockChainServer {
     public List<DataTypes.Block> getBlockchain() {
         return blockchain;
     }
+
+    // propose the block to all other blockchain servers run consensus
+    // and add the decision to the local chain.
     public void addBlock(Block b) {
         Paxos consensus = new Paxos(this, null, 0, 0,  (pNum / 2) + 1, paxsosNum);
         PaxosDecision decision = consensus.propose(b);
         consensus.stopPaxos();
         decided.add(decision);
         blockchain.addAll(decision.v);
-        log.info(format("severs blockadded #####: %d", decision.v.size()));
-
+        log.info(format("severs block added #####: %d", decision.v.size()));
         paxsosNum++;
     }
     public boolean validateBlock(Block b, List<Block> bl) {
-        return true;
+       return validator.validatePaxosChain(bl, b);
     }
+
     public void stopHost() {
         try {
             MembershipDetector.close();
@@ -97,20 +100,13 @@ public class BlockChainServer {
             log.info("[Exception] ", e);
         }
     }
+
     public Block getBlock(int i) {
         return blockchain.get(i);
     }
 
     public int getBCLength(){
         return blockchain.size();
-    }
-
-    public Block propose(Block b) {
-//        Paxos consensus = new Paxos(this, (pNum / 2) + 1, getBCLength());
-//        Block res = consensus.propose(b).get(0);
-//        consensus.stopPaxos();
-//        return res;
-        return null;
     }
 
     public void sleep(int seconds) {
@@ -122,29 +118,38 @@ public class BlockChainServer {
         }
     }
 
-    public void processTransaction(Transaction tx) {
+    // check if the transaction is valid and put it in the block
+    // if not the block is dropped
+    public boolean processTransaction(Transaction tx) {
         log.info(format("Transaction received by server: %s", tx.toString()));
         validator.setCurrentBlock(currentBlock);
         if (! validator.Validate(tx)){
             log.info(format("Transaction dropped by server: %s", tx.toString()));
-            return;
+            return false;
         }
         currentBlock.addTransaction(tx);
         if (currentBlock.isFull()){
             addBlock(currentBlock);
             cleanCurrentBlock();
         }
+        return true;
     }
 
+    // after new blocks was accepted the server starts new block
+    // and the transactions are discarded
     private void cleanCurrentBlock() {
         currentBlock = new Block(paxsosNum);
         log.info(format("current block size after cleaning is: %s", currentBlock.transactions.size()));
     }
 
+    // check if transaction with the same transaction id exists in the blockchain
+    // if exists return the transaction otherwise returns null
     public Transaction checkTransaction(Transaction t){
         return (validator.findTransactionByID(t));
     }
 
+    // check if transaction with the same transaction id exists in the current block and not
+    // if exists return the transaction otherwise returns null
     public Transaction checkPending (Transaction t){
         for(Transaction tr: currentBlock.transactions){
             if (t.getTransactionId() == tr.getTransactionId()){

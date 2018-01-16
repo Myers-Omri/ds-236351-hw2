@@ -10,7 +10,9 @@ import org.apache.commons.cli.*;
 
 import static java.lang.String.format;
 
-
+/*
+standard cli interface to interact with server
+ */
 public class ServerCLI {
     private String[] args = null;
     private Options options = new Options();
@@ -47,12 +49,10 @@ public class ServerCLI {
             if (in[0].equals("start")) {
                 start();
                 return "Initialization of server has finished successfully";
-//                System.out.println("Initialization of server has finished successfully");
             }
             if (in[0].equals("kill")) {
                 kill();
                 return "killing the server has finished successfully";
-//                System.out.println("killing the server has finished successfully");
             }
             if (in[0].equals("exit")) {
                 exit();
@@ -90,7 +90,6 @@ public class ServerCLI {
         System.exit(0);
     }
     private void start() {
-//        Application.init();
     }
     private void kill() {
         Application.s.stopHost();

@@ -13,12 +13,14 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.String.format;
 
+/*
+this class implements Leader Failure Detector using Zookeeper-
+enabling leader election for the Paxos process
+ */
 public class LeaderFailureDetector {
     static private ZooKeeperClient zoo = null;
-//    static private String ID;
     static private String root = "/ELECTION";
     static public String electedLeader = null;
-//    static public boolean leaderFailure = false;
     static private final Lock lock = new ReentrantLock();
     private static Logger log = Logger.getLogger(LeaderFailureDetector.class.getName());
 
@@ -32,6 +34,7 @@ public class LeaderFailureDetector {
             log.info("[Exception] ",e);
         }
     }
+
     static public void connect() throws IOException, InterruptedException {
         String serverName = "localhost";
         if (zoo == null) {
@@ -61,9 +64,6 @@ public class LeaderFailureDetector {
         log.info(format("[%d] is the current leader", Integer.parseInt(electedLeader)));
         lock.unlock();
     }
-//    static public String getCurrentLeader() {
-//        return electedLeader;
-//    }
 
     static public int getCurrentLeaderId() {
         lock.lock();

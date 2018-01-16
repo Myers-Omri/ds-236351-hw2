@@ -23,11 +23,8 @@ public class Block {
         transactions.add(t);
     }
 
-
     public boolean isFull(){
         return transactions.size() >= MAX_BLOCK_SIZE;
     }
-//    //private boolean validate() {
-//        return true;
-//    }
+
 }

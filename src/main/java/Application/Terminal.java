@@ -15,6 +15,9 @@ import javax.swing.SwingUtilities;
 
 //TODO: Keep a global StringBuilder to decrease memory footprint
 
+/*
+Third Party separate CLI
+ */
 public class Terminal {
     private int first = 0;
     private JFrame frm = new JFrame(String.valueOf(Config.id));

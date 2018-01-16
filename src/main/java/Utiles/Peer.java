@@ -16,6 +16,6 @@ public class Peer {
         this.id = id;
         this.addr = addr;
         this.lPort = lPort;
-        this. aPort = aPort;
+        this.aPort = aPort;
     }
 }

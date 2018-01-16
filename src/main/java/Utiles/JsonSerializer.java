@@ -2,6 +2,9 @@ package Utiles;
 
 import com.google.gson.Gson;
 
+/*
+just a simple jason serializer for Paxos messages
+ */
 public class JsonSerializer {
     static Gson gson = new Gson();
     public static String serialize(Object obj) {

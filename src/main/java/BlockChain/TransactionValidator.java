@@ -10,6 +10,10 @@ import java.util.Objects;
 
 import static java.lang.String.format;
 
+/*
+* a simple validator to be used by the blockchain server
+* to validate transactions before adding in to the blockchain
+* */
 public class TransactionValidator {
     private List<Block> blockchain = new ArrayList<>();
     private Block currentBlock;
@@ -26,17 +30,21 @@ public class TransactionValidator {
         this.currentBlock = currentBlock;
     }
 
+    // basic check if transaction with the same id already exist
+    // this can be modified according to the users needs.
     public boolean Validate(Transaction currentTransaction){
         this.currentTransaction = currentTransaction;
         for (Transaction t : currentBlock.transactions){
-            if (!(validateIds(t) && validateFromTo(t))){
+//            if (!(validateIds(t) && validateFromTo(t))){
+            if (validateTransactionId(t)){
                 return false;
             }
         }
 
         for (Block b : blockchain){
             for (Transaction t : b.transactions){
-                if (!(validateIds(t) && validateFromTo(t))){
+//                if (!(validateIds(t) && validateFromTo(t))){
+                if (validateTransactionId(t)){
                     return false;
                 }
             }
@@ -44,6 +52,9 @@ public class TransactionValidator {
         return true;
     }
 
+    private boolean validateTransactionId(Transaction t){
+        return currentTransaction.getTransactionId() == t.getTransactionId();
+    }
     private boolean validateFromTo(Transaction t) {
         boolean res = true;
         if (Objects.equals(t.serviceId, currentTransaction.serviceId)){
@@ -58,7 +69,6 @@ public class TransactionValidator {
 
     private boolean validateIds(Transaction t) {
         boolean res = true;
-
         if (t.getTransactionId() == currentTransaction.getTransactionId()){
             res =  (t.getClientId() == currentTransaction.getClientId()) &&
                     (t.getItemId() == currentTransaction.getItemId());
@@ -78,7 +88,8 @@ public class TransactionValidator {
         for (Transaction currentTransaction : currentBlock.transactions) {
             for (Block b : tempchain) {
                 for (Transaction t: b.transactions) {
-                    if (!(validateIds(t) && validateFromTo(t))){
+                    //if (!(validateIds(t) && validateFromTo(t))){
+                      if (validateTransactionId(t)){
                         return false;
                     }
                 }
@@ -88,9 +99,10 @@ public class TransactionValidator {
     }
 
     public Transaction findTransactionByID(Transaction currentTransaction) {
+        this.currentTransaction = currentTransaction;
         for (Block b : blockchain) {
             for (Transaction t : b.transactions) {
-                if (t.getTransactionId() == currentTransaction.getTransactionId()) {
+                if (validateTransactionId(t)) {
                     log.info(format("found equal id %d:", t.getTransactionId()));
                     return t;
                 }

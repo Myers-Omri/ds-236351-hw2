@@ -9,7 +9,7 @@ public class Transaction {
         COLLECTED_BY_CUSTOMER,
         DEFAULT
     }
-    private int forTest;
+
     private TransactionType _type = TransactionType.DEFAULT;
     private int transactionId;
     private int clientId; //external client- the one that uses ds-shipping service
@@ -23,37 +23,12 @@ public class Transaction {
     public String from;
     public String to;
     public String description;
-    //public String _shipApproval;
 
     // for LOCATION_UPDATE
     public String currentLocation;
     public String nextHop;
 
-    //for COLLECTED_BY_CUSTOMER:
-    //public String _arrivedApproval;
-
-//    public Transaction(int transaction_id, int item_id, int client_id, int receiver_id, TransactionType type){
-//
-//        Random ran = new Random();
-//        forTest = ran.nextInt(100);
-//        transactionId = transaction_id;
-//        itemId = item_id;
-//        clientId = client_id;
-//        receiverId = receiver_id; //TODO: WHAT???
-//        _type = type;
-//    }
-//
-//    public Transaction(int transaction_id){
-//        transactionId = transaction_id;
-//    }
-//    public Transaction(){
-//        transactionId = 0;
-//        itemId = 0;
-//        clientId = 0;
-//        _type = TransactionType.DEFAULT;
-//    }
-
-    @Override
+     @Override
     public String toString() {
         return ("[ID=" + Integer.toString(transactionId) + ", Item ID=" + Integer.toString(itemId) + ", From ID=" + Integer.toString(clientId) + ", To ID=" + Integer.toString(receiverId) + "]");
     }

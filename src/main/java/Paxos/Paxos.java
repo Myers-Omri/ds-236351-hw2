@@ -18,6 +18,7 @@ import static java.lang.StrictMath.max;
 import static java.lang.String.format;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 
+
 public class Paxos {
     private int qSize;
     private BlockChainServer server;
@@ -94,6 +95,7 @@ public class Paxos {
         String strMsg = serialize(new AcceptedMsg(Config.id, msg.r, ack, Config.addr, d.paxosNum));
         server.msn.sendMassageToLeader(strMsg, msg.serverID);
     }
+
     private void acceptorAcceptPhase(AcceptMsg msg) {
         if (msg.round < paxosNum) {
             acceptorAcceptPreviousRoundPhase(msg);
@@ -109,14 +111,11 @@ public class Paxos {
         String strMsg = serialize(new AcceptedMsg(Config.id, msg.r, ack, Config.addr, paxosNum));
         server.msn.sendMassageToLeader(strMsg, msg.serverID);
     }
-    // TODO: no need for previous commit phase!!!
+
     private void acceptorCommitPhase(CommitMsg msg) {
         if (msg.round < paxosNum) return;
         if (!decided) {
             v = msg.blocks;
-//            String strMsg = serialize(new CommitMsg(Config.id, v, Config.addr, paxosNum));
-//            server.msn.broadcastToAcceptors(strMsg, msg.serverID);
-//            server.currentServerId = msg.serverID;
             if (server.isLeader) {
                 log.info(format("[%d] leader waits for semaphore", Config.id));
                 try {
@@ -172,28 +171,10 @@ public class Paxos {
             tp.execute(this::runLeaderPhase);
             acceptorPhase();
     }
-//    private boolean isLeaderChanged(int leaderID) {
-//       if (leaderID == LeaderFailureDetector.getCurrentLeaderId()
-//               && leaderID != server.currentServerId) {
-//           log.info(format("[%d] known leader has changed [%d]", Config.id, leaderID));
-//           server.currentServerId = leaderID;
-//           return true;
-//       }
-//       return false;
-//    }
+
     private void acceptorPhase() {
         while (!decided) {
             Object msg = server.msn.receiveAcceptorMsg(paxosNum);
-//            if (!isLeaderChanged(((PaxosMsg)msg).serverID)) {
-//                if (((PaxosMsg) msg).round < paxosNum) {
-//                    log.info(format("[%d] skipped massage from [%d]", Config.id, ((PaxosMsg) msg).serverID));
-//                    continue;
-//                }
-//            }
-//            if (leaderPhase < paxosNum) {
-//                decided = true;
-//                return leaderPhase;
-//            }
             if (msg instanceof PrepareMsg) {
                 log.info(format("[%d] accepted prepare Msg on round [%d] from [%d]", Config.id, paxosNum, ((PrepareMsg) msg).serverID));
                 acceptorPreparePhase((PrepareMsg) msg);
