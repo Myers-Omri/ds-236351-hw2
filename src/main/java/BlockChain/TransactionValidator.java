@@ -85,11 +85,11 @@ public class TransactionValidator {
     }
 
     public boolean validatePaxosChain(List<Block> tempchain, Block currentBlock) {
-        for (Transaction currentTransaction : currentBlock.transactions) {
+        for (Transaction ct : currentBlock.transactions) {
             for (Block b : tempchain) {
                 for (Transaction t: b.transactions) {
                     //if (!(validateIds(t) && validateFromTo(t))){
-                      if (validateTransactionId(t)){
+                      if (ct.getTransactionId() == t.getTransactionId()){
                         return false;
                     }
                 }

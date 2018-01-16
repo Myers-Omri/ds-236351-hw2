@@ -29,7 +29,6 @@ DataTypes\Transaction$TransactionType.class
 Utiles\MembershipDetector.class
 Paxos\PaxosMsgs\AcceptedMsg.class
 Application\DSController.class
-DataTypes\Address.class
 Paxos\PaxosMsgs\PaxosMassegesTypes.class
 Application\Terminal$TerminalHolder.class
 Utiles\Config.class
