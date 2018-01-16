@@ -118,11 +118,12 @@ public class Paxos {
             v = msg.blocks;
             if (server.isLeader) {
                 log.info(format("[%d] leader waits for semaphore", Config.id));
-                try {
-                    broadcasted.acquire();
-                } catch (InterruptedException e) {
-                    log.info(format("[Exception] [%d]", Config.id),e);
-                }
+//                try {
+//                    broadcasted.acquire();
+//                } catch (InterruptedException e) {
+//                    log.info(format("[Exception] [%d]", Config.id),e);
+//                }
+                server.msn.broadcastToAcceptors(serialize(msg), Config.id);
             }
             log.info(format("[%d] decided round [%d]", Config.id, paxosNum));
             decided = true;
@@ -161,8 +162,9 @@ public class Paxos {
             return false;
         }
         String strMsg = serialize(new CommitMsg(Config.id, v, Config.addr, paxosNum));
-        server.msn.broadcastToAcceptors(strMsg, -1); //TODO: BUG alerts!!
-        broadcasted.release();
+//        server.msn.broadcastToAcceptors(strMsg, -1); //TODO: BUG alerts!!
+        server.msn.sendMsg(strMsg, Config.addr, Config.aPort, Config.id);
+//        broadcasted.release();
         return true;
     }
 
