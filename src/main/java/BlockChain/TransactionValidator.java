@@ -26,10 +26,6 @@ public class TransactionValidator {
         this.currentBlock = currentBlock;
     }
 
-//    public void setCurrentTransaction(Transaction currentTransaction){
-//        this.currentTransaction = currentTransaction;
-//    }
-
     public boolean Validate(Transaction currentTransaction){
         this.currentTransaction = currentTransaction;
         for (Transaction t : currentBlock.transactions){

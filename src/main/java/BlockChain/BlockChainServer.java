@@ -137,9 +137,7 @@ public class BlockChainServer {
     }
 
     private void cleanCurrentBlock() {
-        //long lastHash = blockchain.get(blockchain.size() - 1).prevBlockHash;
         Block tmpBlock = new Block(paxsosNum);
-
         for (Transaction t: currentBlock.transactions){
             if (validator.findTransactionByID(t) == null){
                 tmpBlock .addTransaction(t);
