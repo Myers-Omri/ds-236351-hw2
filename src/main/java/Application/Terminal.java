@@ -1,5 +1,7 @@
 package Application;
 
+import Utiles.Config;
+
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -15,7 +17,7 @@ import javax.swing.SwingUtilities;
 
 public class Terminal {
     private int first = 0;
-    private JFrame frm = new JFrame("Terminal");
+    private JFrame frm = new JFrame(String.valueOf(Config.id));
     private JTextArea txtArea = new JTextArea();
     private JScrollPane scrollPane = new JScrollPane();
     private CommandProcessor processor = CommandProcessor.getInstance();

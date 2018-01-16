@@ -5,7 +5,10 @@ import java.util.Random;
 import DataTypes.Block;
 import DataTypes.Transaction;
 import Utiles.JsonSerializer;
+import Utiles.LeaderFailureDetector;
 import org.apache.commons.cli.*;
+
+import static java.lang.String.format;
 
 
 public class ServerCLI {
@@ -20,6 +23,8 @@ public class ServerCLI {
         options.addOption("showBC", "print the whole BC");
         options.addOption("exit", "exit the program");
         options.addOption("sleep", "sleep random time");
+        options.addOption("add", "adding a new block");
+        options.addOption("leader", "showing how it leader");
         options.addOption(Option.builder("show")
                 .hasArg()
                 .desc("shows the required block")
@@ -27,10 +32,6 @@ public class ServerCLI {
         options.addOption(Option.builder("propose")
                 .hasArg()
                 .desc("propose a new block")
-                .build());
-        options.addOption(Option.builder("add")
-                .hasArg()
-                .desc("adding a new block")
                 .build());
     }
 
@@ -68,14 +69,12 @@ public class ServerCLI {
                 int num = Integer.parseInt(in[0].split("-")[1]);
                 return show(num);
             }
-//            if (in[0].split("-")[0].equals("propose")) {
-//                int hash = Integer.parseInt(in[0].split("-")[1]);
-//                propose(hash);
-//            }
             if (in[0].equals("add")) {
-//                int hash = Integer.parseInt(in[0].split("-")[1]);
                  add();
                  return null;
+            }
+            if (in[0].equals("leader")) {
+                return format("Current leader is [%d]", LeaderFailureDetector.getCurrentLeaderId());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -110,10 +109,7 @@ public class ServerCLI {
         int x = ran.nextInt(3) + 3;
         Application.s.sleep(x);
     }
-    private void propose(int hash) {
-        Block b = new Block(hash);
-        System.out.println(JsonSerializer.serialize(Application.s.propose(b)));
-    }
+
     private void add() {
         Block b = new Block(0);
         Random ran = new Random();
@@ -122,8 +118,6 @@ public class ServerCLI {
                 b.addTransaction(new Transaction());
             }
         }
-//        b.addTransaction(new Transaction());
-//        b.addTransaction(new Transaction());
         Application.s.addBlock(b);
     }
 }

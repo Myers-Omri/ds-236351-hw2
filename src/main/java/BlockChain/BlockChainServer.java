@@ -138,14 +138,14 @@ public class BlockChainServer {
 
     private void cleanCurrentBlock() {
         //long lastHash = blockchain.get(blockchain.size() - 1).prevBlockHash;
-        Block tmpBlock = new Block(paxsosNum);
+        currentBlock = new Block(paxsosNum);
 
-        for (Transaction t: currentBlock.transactions){
-            if (validator.findTransactionByID(t) == null){
-                tmpBlock .addTransaction(t);
-            }
-        }
-        currentBlock=tmpBlock;
+//        for (Transaction t: currentBlock.transactions){
+//            if (validator.findTransactionByID(t) == null){
+//                tmpBlock .addTransaction(t);
+//            }
+//        }
+//        currentBlock=tmpBlock;
         log.info(format("current block size after cleaning is: %s", currentBlock.transactions.size()));
     }
 
