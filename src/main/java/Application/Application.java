@@ -14,11 +14,15 @@ import static java.lang.String.format;
 @SpringBootApplication
 public class Application {
     static public BlockChainServer s;
+
+    //initiate user configuration and starts blockchain server
     static private void init() throws IOException {
         Config.init();
         SystemUtiles.init();
         s = new BlockChainServer(Config.s_name, Config.addr, new Block(0), Config.p_num);
     }
+
+
     public static void main(String[] args) throws IOException {
         init();
         Thread thread = new Thread(){

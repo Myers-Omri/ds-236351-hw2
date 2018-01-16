@@ -8,10 +8,8 @@ public class AcceptedMsg extends PaxosMsg {
         type = PaxosMassegesTypes.ACCEPTED;
         serverAddr = sAddr;
         serverID = id;
-//        blockNum = blockn;
         r =_r;
         ack = _ack;
         round = _round;
-//        port = _port;
     }
 }
